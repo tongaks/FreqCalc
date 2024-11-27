@@ -9,6 +9,8 @@ int CLASS_RANGE = 0;
 int *CLASS_SET;
 int *UPPER_LIMITS;
 int *LOWER_LIMITS;
+int *FREQUENCIES;
+int *COMMULATIVE_FREQUENCIES;
 
 int MIN_DATA = 0;
 int MAX_DATA = 0;
@@ -50,9 +52,10 @@ void GetClassInterval() {
     k = 1.0 + (3.3 * (log10(POPULATION_SIZE)));
 
     CLASS_WIDTH = k;
-
     UPPER_LIMITS = (int *) malloc((CLASS_WIDTH + 1) * sizeof(int));
     LOWER_LIMITS = (int *) malloc((CLASS_WIDTH + 1) * sizeof(int));
+    FREQUENCIES = (int *) malloc((CLASS_WIDTH + 1) * sizeof(int));
+    COMMULATIVE_FREQUENCIES = (int *) malloc((CLASS_WIDTH + 1) * sizeof(int));
 
     k = (CLASS_RANGE / k);
 
@@ -76,7 +79,29 @@ void GetClassLimits() {
 }
 
 void GetFrequencies() {
+    for (int d = 0; d < CLASS_WIDTH + 1; d++) {
+        int freq = 0;
+        
+        for (int i = 0; i < POPULATION_SIZE; i++) {
+            if (CLASS_SET[i] <= UPPER_LIMITS[d] && CLASS_SET[i] >= LOWER_LIMITS[d]) {
+                freq++;
+            }
+        }
+
+        FREQUENCIES[d] = freq;
+        freq = 0;
+    }
+}
+
+void GetCommulativeFrequencies() {
     
+    int last_val = 0;
+    for (int i = 0; i <= CLASS_WIDTH; i++) {
+        int val = FREQUENCIES[i];
+
+        last_val += val;
+        COMMULATIVE_FREQUENCIES[i] = last_val;
+    }
 }
 
 void GetPopulationOrder() {
@@ -107,8 +132,19 @@ void DisplayInterval() {
 }
 
 void DisplayFrequencyTable() {
-    printf("Class Limits:\n");
     for (int i = 0; i < CLASS_WIDTH + 1; i++) {
-        printf("%i-%i\n", LOWER_LIMITS[i], UPPER_LIMITS[i]);
+        uintptr_t lower_converted = (uintptr_t) LOWER_LIMITS[i]; 
+        uintptr_t upper_converted = (uintptr_t) UPPER_LIMITS[i]; 
+        uintptr_t freq_converted = (uintptr_t) FREQUENCIES[i]; 
+        uintptr_t comm_converted = (uintptr_t) COMMULATIVE_FREQUENCIES[i]; 
+        
+        if (!(lower_converted < 10 || upper_converted < 10)) {
+            printf("\t| %i-%i |", LOWER_LIMITS[i], UPPER_LIMITS[i]);            
+        } else {
+            printf("\t| %i -%i |", LOWER_LIMITS[i], UPPER_LIMITS[i]);            
+        }
+
+        printf(" %i |", FREQUENCIES[i]);
+        printf(" %i |\n", COMMULATIVE_FREQUENCIES[i]);
     }
 }

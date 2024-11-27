@@ -7,6 +7,8 @@ int main() {
 	DisplayInterval();
 	GetPopulationOrder();
 	GetClassLimits();
+	GetFrequencies();
+	GetCommulativeFrequencies();
 
 	DisplayFrequencyTable();
 	return 0;
