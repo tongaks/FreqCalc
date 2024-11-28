@@ -2,13 +2,20 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdint.h>
+#include <stdbool.h>
+#include <string.h>
 
-void DisplayMainMenu();
+int DisplayMainMenu();
 void DisplayTable();
 void DisplayInterval();
 void DisplayFrequencyTable();
 
+void GetMeanValue();
+void GetStandardDeviation();
+void GetSquaredDeviation();
+void GetVarianceValue();
 void GetFrequencies();
+void GetClassBoundariesAndClassMarks();
 void GetCommulativeFrequencies();
 void GetPopulationSize();
 void GetClassDatas();

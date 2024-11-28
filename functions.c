@@ -12,8 +12,18 @@ int *LOWER_LIMITS;
 int *FREQUENCIES;
 int *COMMULATIVE_FREQUENCIES;
 
+float *UPPER_BOUNDARIES;
+float *LOWER_BOUNDARIES;
+float *CLASS_MARKS;
+float *MEAN_DEVIATION;
+float *SQUARED_DEVIATION;
+
 int MIN_DATA = 0;
 int MAX_DATA = 0;
+float MEAN = 0;
+float STANDARD_DEVIATION = 0;
+float TOTAL_SQUARED_DEVIATION = 0;
+float VARIANCE = 0;
 
 void GetPopulationSize() {
     printf("[+] Insert Population Size: ");
@@ -24,11 +34,46 @@ void GetPopulationSize() {
     printf("[!] The population size is %i\n", POPULATION_SIZE);
 }
 
+void GetMeanValue() {
+    for (int i = 0; i < POPULATION_SIZE; i++) {
+        MEAN += CLASS_SET[i];
+    }  MEAN /= 2;
+
+    printf("MEAN: %.2f\n", MEAN);
+}
+
 void GetClassDatas() {
     for(int i = 0; i < POPULATION_SIZE; i++){
         printf("[+] Insert Class Content #%d: ", i + 1);
         scanf("%d", &CLASS_SET[i]);
     }
+}
+
+void GetSquaredDeviation() {
+    SQUARED_DEVIATION = (float *) malloc((CLASS_WIDTH + 1) * sizeof(float));
+    for (int i = 0; i < CLASS_WIDTH + 1; i++) {
+        SQUARED_DEVIATION[i] = abs(MEAN_DEVIATION[i] * MEAN_DEVIATION[i]);
+    }
+
+    for (int i = 0; i < CLASS_WIDTH + 1; i++) {
+        TOTAL_SQUARED_DEVIATION += SQUARED_DEVIATION[i];
+    }    
+}
+
+void GetStandardDeviation() {
+    MEAN_DEVIATION = (float *) malloc((CLASS_WIDTH + 1) * sizeof(float));
+    for (int i = 0; i < CLASS_WIDTH + 1; i++) {
+        MEAN_DEVIATION[i] = CLASS_SET[i] - MEAN;
+    }
+
+    GetSquaredDeviation();
+    STANDARD_DEVIATION = sqrt(TOTAL_SQUARED_DEVIATION / POPULATION_SIZE);
+    printf("SD: %.2f\n", STANDARD_DEVIATION);
+}
+
+void GetVarianceValue() {
+    VARIANCE = TOTAL_SQUARED_DEVIATION / POPULATION_SIZE;
+    printf("Variance: %.2f\n", VARIANCE);
 }
 
 void GetClassInterval() {
@@ -94,13 +139,28 @@ void GetFrequencies() {
 }
 
 void GetCommulativeFrequencies() {
-    
     int last_val = 0;
     for (int i = 0; i <= CLASS_WIDTH; i++) {
         int val = FREQUENCIES[i];
 
         last_val += val;
         COMMULATIVE_FREQUENCIES[i] = last_val;
+    }
+}
+
+void GetClassBoundariesAndClassMarks() {
+    UPPER_BOUNDARIES = (float *) malloc((CLASS_WIDTH + 1) * sizeof(float));
+    LOWER_BOUNDARIES = (float *) malloc((CLASS_WIDTH + 1) * sizeof(float));
+    CLASS_MARKS = (float *) malloc((CLASS_WIDTH + 1) * sizeof(*CLASS_MARKS));
+
+    for (int i = 0; i < POPULATION_SIZE; i++) {
+        UPPER_BOUNDARIES[i] = UPPER_LIMITS[i] + 0.5;
+        LOWER_BOUNDARIES[i] = LOWER_LIMITS[i] - 0.5;
+    }
+   
+
+    for (int i = 0; i < CLASS_WIDTH + 1; i++) {
+        CLASS_MARKS[i] = (LOWER_BOUNDARIES[i] + UPPER_BOUNDARIES[i]) / 2;
     }
 }
 
@@ -112,6 +172,23 @@ void GetPopulationOrder() {
         scanf("%d", &CLASS_LIMIT_ORDER);
     } while(CLASS_LIMIT_ORDER < 0 || CLASS_LIMIT_ORDER > 1);
 
+}
+
+int DisplayMainMenu() {
+    while (true) {
+        int choice = 0;
+        printf("(1) New table\n");
+        printf("(2) Ope table\n");
+        printf("(3) Exit\n");
+        printf("Enter: ");
+        scanf("%i", &choice);
+
+        while (getchar() != '\n');
+        if (choice > 3 || choice < 1) {
+            printf("Invalid input.\n");
+            DisplayMainMenu();
+        } else return choice;
+    }
 }
 
 void DisplayInterval() {
@@ -132,19 +209,33 @@ void DisplayInterval() {
 }
 
 void DisplayFrequencyTable() {
-    for (int i = 0; i < CLASS_WIDTH + 1; i++) {
-        uintptr_t lower_converted = (uintptr_t) LOWER_LIMITS[i]; 
-        uintptr_t upper_converted = (uintptr_t) UPPER_LIMITS[i]; 
-        uintptr_t freq_converted = (uintptr_t) FREQUENCIES[i]; 
-        uintptr_t comm_converted = (uintptr_t) COMMULATIVE_FREQUENCIES[i]; 
-        
-        if (!(lower_converted < 10 || upper_converted < 10)) {
+    for (int i = 0; i < CLASS_WIDTH + 1; i++) {        
+        if (!(LOWER_LIMITS[i] < 10 || UPPER_LIMITS[i] < 10)) {
             printf("\t| %i-%i |", LOWER_LIMITS[i], UPPER_LIMITS[i]);            
         } else {
             printf("\t| %i -%i |", LOWER_LIMITS[i], UPPER_LIMITS[i]);            
         }
+        
+        if (!(FREQUENCIES[i] > 9)) {
+            printf(" %i |", FREQUENCIES[i]);            
+        } else {
+            printf(" %i|", FREQUENCIES[i]);            
+        }
 
-        printf(" %i |", FREQUENCIES[i]);
-        printf(" %i |\n", COMMULATIVE_FREQUENCIES[i]);
+        if (!(COMMULATIVE_FREQUENCIES[i] > 9)) {
+            printf(" %i |", COMMULATIVE_FREQUENCIES[i]);            
+        } else {
+            printf(" %i|", COMMULATIVE_FREQUENCIES[i]);
+        }
+
+        if (!(CLASS_MARKS[i] > 9))
+            printf(" %.1f  |", CLASS_MARKS[i]);
+        else
+            printf(" %.1f |", CLASS_MARKS[i]);
+
+        if (!((int)LOWER_BOUNDARIES[i] > 9))
+            printf(" %.1lf -%.1lf |\n", LOWER_BOUNDARIES[i], UPPER_BOUNDARIES[i]);
+        else
+            printf(" %.1lf-%.1lf |\n", LOWER_BOUNDARIES[i], UPPER_BOUNDARIES[i]);
     }
 }
