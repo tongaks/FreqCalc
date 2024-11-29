@@ -26,6 +26,7 @@ float TOTAL_SQUARED_DEVIATION = 0;
 float VARIANCE = 0;
 
 void GetPopulationSize() {
+    printf("\n============================================================\n");
     printf("[+] Insert Population Size: ");
     scanf("%d", &POPULATION_SIZE);
 
@@ -38,11 +39,10 @@ void GetMeanValue() {
     for (int i = 0; i < POPULATION_SIZE; i++) {
         MEAN += CLASS_SET[i];
     }  MEAN /= 2;
-
-    printf("MEAN: %.2f\n", MEAN);
 }
 
 void GetClassDatas() {
+    printf("\n============================================================\n");
     for(int i = 0; i < POPULATION_SIZE; i++){
         printf("[+] Insert Class Content #%d: ", i + 1);
         scanf("%d", &CLASS_SET[i]);
@@ -68,12 +68,10 @@ void GetStandardDeviation() {
 
     GetSquaredDeviation();
     STANDARD_DEVIATION = sqrt(TOTAL_SQUARED_DEVIATION / POPULATION_SIZE);
-    printf("SD: %.2f\n", STANDARD_DEVIATION);
 }
 
 void GetVarianceValue() {
     VARIANCE = TOTAL_SQUARED_DEVIATION / POPULATION_SIZE;
-    printf("Variance: %.2f\n", VARIANCE);
 }
 
 void GetClassInterval() {
@@ -177,15 +175,27 @@ void GetPopulationOrder() {
 int DisplayMainMenu() {
     while (true) {
         int choice = 0;
-        printf("(1) New table\n");
-        printf("(2) Ope table\n");
-        printf("(3) Exit\n");
-        printf("Enter: ");
+
+        for (int i = 0; i < 60; i++) {
+            printf("=");
+        } printf("\n");
+
+        printf("\tFrequency Distribution Table Calculator\n");
+
+        for (int i = 0; i < 60; i++) {
+            printf("=");
+        } printf("\n");
+
+        printf("\t\t(1) New table\n");
+        printf("\t\t(2) Open existing table\n");
+        printf("\t\t(3) Exit\n");
+        printf("\t\tEnter: ");
         scanf("%i", &choice);
 
         while (getchar() != '\n');
         if (choice > 3 || choice < 1) {
             printf("Invalid input.\n");
+            choice = 0;
             DisplayMainMenu();
         } else return choice;
     }
@@ -197,19 +207,30 @@ void DisplayInterval() {
 		printf("=");
 	} printf("\n\n");
 
-	printf(" Maximum Value: [%d]\n", MAX_DATA);
-    printf(" Minimum Value: [%d]\n", MIN_DATA);
-    printf("    ClassRange: [%i]\n", CLASS_RANGE);
-    printf("Class Interval: [%i]\n", CLASS_INTERVAL);
-    printf("   Class Width: [%i]\n\n", CLASS_WIDTH);
+	printf("\t Maximum Value: %d\n", MAX_DATA);
+    printf("\t Minimum Value: %d\n", MIN_DATA);
+    printf("\t    ClassRange: %i\n", CLASS_RANGE);
+    printf("\tClass Interval: %i\n", CLASS_INTERVAL);
+    printf("\t   Class Width: %i\n", CLASS_WIDTH);
+    printf("\t          Mean: %.2f\n", MEAN);
+    printf("\t            SD: %.2f\n", STANDARD_DEVIATION);
+    printf("\t      Variance: %.2f\n\n", VARIANCE);
 
 	for (int i = 0; i < 60; i++) {
 		printf("=");
-	} printf("\n");
+	} printf("\n\n");
 }
 
 void DisplayFrequencyTable() {
-    for (int i = 0; i < CLASS_WIDTH + 1; i++) {        
+    for (int i = 0; i < CLASS_WIDTH + 1; i++) {
+        if (i == 0) {
+            printf("\t  CL ");
+            printf("\t  f ");
+            printf("  CF ");
+            printf("  Xm ");
+            printf("\t   CB \n");
+        }
+
         if (!(LOWER_LIMITS[i] < 10 || UPPER_LIMITS[i] < 10)) {
             printf("\t| %i-%i |", LOWER_LIMITS[i], UPPER_LIMITS[i]);            
         } else {
@@ -223,7 +244,7 @@ void DisplayFrequencyTable() {
         }
 
         if (!(COMMULATIVE_FREQUENCIES[i] > 9)) {
-            printf(" %i |", COMMULATIVE_FREQUENCIES[i]);            
+            printf(" %i |", COMMULATIVE_FREQUENCIES[i]);
         } else {
             printf(" %i|", COMMULATIVE_FREQUENCIES[i]);
         }

@@ -7,7 +7,6 @@ int main() {
 	GetPopulationSize();
 	GetClassDatas();
 	GetClassInterval();
-	DisplayInterval();
 	GetPopulationOrder();
 	GetClassLimits();
 	GetFrequencies();
@@ -17,6 +16,7 @@ int main() {
 	GetStandardDeviation();
 	GetVarianceValue();
 
+	DisplayInterval();
 	DisplayFrequencyTable();
 	return 0;
 }
