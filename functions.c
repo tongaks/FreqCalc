@@ -36,6 +36,7 @@ void GetPopulationSize() {
 }
 
 void GetMeanValue() {
+    printf("Computing mean...\n");
     for (int i = 0; i < POPULATION_SIZE; i++) {
         MEAN += CLASS_SET[i];
     }  MEAN /= 2;
@@ -50,7 +51,6 @@ void GetClassDatas() {
 }
 
 void GetSquaredDeviation() {
-    SQUARED_DEVIATION = (float *) malloc((CLASS_WIDTH + 1) * sizeof(float));
     for (int i = 0; i < CLASS_WIDTH + 1; i++) {
         SQUARED_DEVIATION[i] = abs(MEAN_DEVIATION[i] * MEAN_DEVIATION[i]);
     }
@@ -61,7 +61,7 @@ void GetSquaredDeviation() {
 }
 
 void GetStandardDeviation() {
-    MEAN_DEVIATION = (float *) malloc((CLASS_WIDTH + 1) * sizeof(float));
+    printf("Computing SD...\n");
     for (int i = 0; i < CLASS_WIDTH + 1; i++) {
         MEAN_DEVIATION[i] = CLASS_SET[i] - MEAN;
     }
@@ -71,6 +71,7 @@ void GetStandardDeviation() {
 }
 
 void GetVarianceValue() {
+    printf("Computing Variance...\n");
     VARIANCE = TOTAL_SQUARED_DEVIATION / POPULATION_SIZE;
 }
 
@@ -94,11 +95,17 @@ void GetClassInterval() {
 
     k = 1.0 + (3.3 * (log10(POPULATION_SIZE)));
 
-    CLASS_WIDTH = k;
-    UPPER_LIMITS = (int *) malloc((CLASS_WIDTH + 1) * sizeof(int));
-    LOWER_LIMITS = (int *) malloc((CLASS_WIDTH + 1) * sizeof(int));
-    FREQUENCIES = (int *) malloc((CLASS_WIDTH + 1) * sizeof(int));
+    CLASS_WIDTH = round(k);
+
     COMMULATIVE_FREQUENCIES = (int *) malloc((CLASS_WIDTH + 1) * sizeof(int));
+    FREQUENCIES = (int *) malloc((CLASS_WIDTH + 1) * sizeof(int));
+    
+    UPPER_BOUNDARIES = (float *) malloc((CLASS_WIDTH + 1) * sizeof(float));
+    LOWER_BOUNDARIES = (float *) malloc((CLASS_WIDTH + 1) * sizeof(float));
+    CLASS_MARKS = (float *) malloc((CLASS_WIDTH + 1) * sizeof(*CLASS_MARKS));
+
+    MEAN_DEVIATION = (float *) malloc((CLASS_WIDTH + 1) * sizeof(float));
+    SQUARED_DEVIATION = (float *) malloc((CLASS_WIDTH + 1) * sizeof(float));
 
     k = (CLASS_RANGE / k);
 
@@ -106,7 +113,10 @@ void GetClassInterval() {
 }
 
 void GetClassLimits() {
+    printf("Computing class limit...\n");
 	int UpperBound, LowerBound;
+    UPPER_LIMITS = (int *) malloc((CLASS_WIDTH + 1) * sizeof(int));
+    LOWER_LIMITS = (int *) malloc((CLASS_WIDTH + 1) * sizeof(int));
 
     int iterator = 0;
     for (int i = MAX_DATA; i >= CLASS_WIDTH;) {
@@ -118,10 +128,11 @@ void GetClassLimits() {
 
         i -= CLASS_INTERVAL;
         iterator++;
-    }
+    } printf("[+] Done\n");
 }
 
 void GetFrequencies() {
+    printf("Computing frequencies...\n");
     for (int d = 0; d < CLASS_WIDTH + 1; d++) {
         int freq = 0;
         
@@ -133,24 +144,23 @@ void GetFrequencies() {
 
         FREQUENCIES[d] = freq;
         freq = 0;
-    }
+    } printf("[+] Done\n");
 }
 
 void GetCommulativeFrequencies() {
+    printf("Computing commulative frequencies...\n");
+
     int last_val = 0;
-    for (int i = 0; i <= CLASS_WIDTH; i++) {
+    for (int i = 0; i <= CLASS_WIDTH + 1; i++) {
         int val = FREQUENCIES[i];
 
         last_val += val;
         COMMULATIVE_FREQUENCIES[i] = last_val;
-    }
+    } printf("[+] Done\n");
 }
 
 void GetClassBoundariesAndClassMarks() {
-    UPPER_BOUNDARIES = (float *) malloc((CLASS_WIDTH + 1) * sizeof(float));
-    LOWER_BOUNDARIES = (float *) malloc((CLASS_WIDTH + 1) * sizeof(float));
-    CLASS_MARKS = (float *) malloc((CLASS_WIDTH + 1) * sizeof(*CLASS_MARKS));
-
+    printf("Computing class boundary and class mark... ");
     for (int i = 0; i < POPULATION_SIZE; i++) {
         UPPER_BOUNDARIES[i] = UPPER_LIMITS[i] + 0.5;
         LOWER_BOUNDARIES[i] = LOWER_LIMITS[i] - 0.5;
@@ -159,7 +169,7 @@ void GetClassBoundariesAndClassMarks() {
 
     for (int i = 0; i < CLASS_WIDTH + 1; i++) {
         CLASS_MARKS[i] = (LOWER_BOUNDARIES[i] + UPPER_BOUNDARIES[i]) / 2;
-    }
+    } printf("Done\n");
 }
 
 void GetPopulationOrder() {
@@ -169,7 +179,6 @@ void GetPopulationOrder() {
         printf("[+] Select Population Order: ");
         scanf("%d", &CLASS_LIMIT_ORDER);
     } while(CLASS_LIMIT_ORDER < 0 || CLASS_LIMIT_ORDER > 1);
-
 }
 
 int DisplayMainMenu() {
@@ -228,7 +237,7 @@ void DisplayFrequencyTable() {
             printf("\t  f ");
             printf("  CF ");
             printf("  Xm ");
-            printf("\t   CB \n");
+            printf("\t CB \n");
         }
 
         if (!(LOWER_LIMITS[i] < 10 || UPPER_LIMITS[i] < 10)) {
