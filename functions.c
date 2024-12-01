@@ -36,10 +36,11 @@ void GetPopulationSize() {
 }
 
 void GetMeanValue() {
-    printf("Computing mean...\n");
+    printf("Computing mean... ");
     for (int i = 0; i < POPULATION_SIZE; i++) {
         MEAN += CLASS_SET[i];
     }  MEAN /= 2;
+    printf("Done\n");
 }
 
 void GetClassDatas() {
@@ -51,6 +52,7 @@ void GetClassDatas() {
 }
 
 void GetSquaredDeviation() {
+    printf("Computing Squared SD... ");
     for (int i = 0; i < CLASS_WIDTH + 1; i++) {
         SQUARED_DEVIATION[i] = abs(MEAN_DEVIATION[i] * MEAN_DEVIATION[i]);
     }
@@ -61,21 +63,24 @@ void GetSquaredDeviation() {
 }
 
 void GetStandardDeviation() {
-    printf("Computing SD...\n");
+    printf("Computing SD... ");
     for (int i = 0; i < CLASS_WIDTH + 1; i++) {
         MEAN_DEVIATION[i] = CLASS_SET[i] - MEAN;
     }
 
     GetSquaredDeviation();
     STANDARD_DEVIATION = sqrt(TOTAL_SQUARED_DEVIATION / POPULATION_SIZE);
+    printf("Done\n");
 }
 
 void GetVarianceValue() {
-    printf("Computing Variance...\n");
+    printf("Computing Variance... ");
     VARIANCE = TOTAL_SQUARED_DEVIATION / POPULATION_SIZE;
+    printf("Done\n");
 }
 
 void GetClassInterval() {
+    printf("Computing class interval... ");
 	int minData = CLASS_SET[0];
     int maxData = CLASS_SET[0];
     double k = 0;				// class width
@@ -110,10 +115,11 @@ void GetClassInterval() {
     k = (CLASS_RANGE / k);
 
     CLASS_INTERVAL = round(k);
+    printf("Done\n");
 }
 
 void GetClassLimits() {
-    printf("Computing class limit...\n");
+    printf("Computing class limit... ");
 	int UpperBound, LowerBound;
     UPPER_LIMITS = (int *) malloc((CLASS_WIDTH + 1) * sizeof(int));
     LOWER_LIMITS = (int *) malloc((CLASS_WIDTH + 1) * sizeof(int));
@@ -128,11 +134,11 @@ void GetClassLimits() {
 
         i -= CLASS_INTERVAL;
         iterator++;
-    } printf("[+] Done\n");
+    } printf("Done\n");
 }
 
 void GetFrequencies() {
-    printf("Computing frequencies...\n");
+    printf("Computing frequencies... ");
     for (int d = 0; d < CLASS_WIDTH + 1; d++) {
         int freq = 0;
         
@@ -144,11 +150,11 @@ void GetFrequencies() {
 
         FREQUENCIES[d] = freq;
         freq = 0;
-    } printf("[+] Done\n");
+    } printf("Done\n");
 }
 
 void GetCommulativeFrequencies() {
-    printf("Computing commulative frequencies...\n");
+    printf("Computing commulative frequencies...   ");
 
     int last_val = 0;
     for (int i = 0; i <= CLASS_WIDTH + 1; i++) {
@@ -156,7 +162,7 @@ void GetCommulativeFrequencies() {
 
         last_val += val;
         COMMULATIVE_FREQUENCIES[i] = last_val;
-    } printf("[+] Done\n");
+    } printf("Done\n");
 }
 
 void GetClassBoundariesAndClassMarks() {
@@ -179,6 +185,10 @@ void GetPopulationOrder() {
         printf("[+] Select Population Order: ");
         scanf("%d", &CLASS_LIMIT_ORDER);
     } while(CLASS_LIMIT_ORDER < 0 || CLASS_LIMIT_ORDER > 1);
+
+    for (int i = 0; i < 60; i++) {
+        printf("=");
+    } printf("\n");
 }
 
 int DisplayMainMenu() {
