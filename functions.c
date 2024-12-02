@@ -6,7 +6,7 @@ int CLASS_LIMIT_ORDER = 0;
 int CLASS_WIDTH = 0;
 int CLASS_RANGE = 0;
 char INPUT_BUFFER[100];
-
+int DATA_COUNT = 0;
 
 // arrays
 int *CLASS_SET;
@@ -37,8 +37,6 @@ void GetPopulationSize() {
     printf("[+] Insert Population Size: ");
     scanf("%d", &POPULATION_SIZE);
 
-    CLASS_SET = (int *) malloc(POPULATION_SIZE * sizeof(int));
-
     printf("[!] The population size is %i\n", POPULATION_SIZE);
 }
 
@@ -50,54 +48,78 @@ void GetMeanValue() {
     printf("Done\n");
 }
 
-// void LoadPreviousData() {
-//     char choice[2];
-//     printf("[!] Load the previous data?\n");
-//     printf("[+] Y|y or N|n: ");
-//     scanf("%1s", choice);
+void GetPreviousDataCount() {
+    printf("\n============================================================\n");
+    FILE* temp_file;
+    temp_file = fopen("temp.txt", "r");
+    if (temp_file == NULL) perror("[!] Failed to open temp file.\n");
 
-//     if (strcmp("Y", choice) == 0 || strcmp("y", choice) == 0) {
-//         char buffer[5];
-//         FILE* temp_file;
-//         temp_file = fopen("temp.txt", "r");
-//         if (temp_file == NULL) perror("[!] Failed to open temp file.\n");
+    char buffer[5];
+    printf("[!] Getting the previous number of data...\n");
+    while (true) {
+        if (fgets(buffer, 4, temp_file) != NULL) {
+            DATA_COUNT += 1;
+        } else break;
+    } 
 
-//         for(int i = 0; i < POPULATION_SIZE; i++){
-//             while (buffer = fgets(temp_file) != EOF) {
-                
-//             }
-//         }        
-        
-//         fclose(temp_file);
-//     }    
-// }
+    printf("[!] Previous number of data: %i\n", DATA_COUNT);
+    fclose(temp_file);
+}
 
-int InputValidation(int inputVariable) {
-    bool isValid = true;
-    fgets(INPUT_BUFFER, 100, stdin);
+void LoadPreviousData() {
+    GetPreviousDataCount();
+    FILE* temp_file;
+    temp_file = fopen("temp.txt", "r");
+    if (temp_file == NULL) perror("[!] Failed to open temp file.\n");
 
-    for (int i = 0; i < 100; i++) {
-        if (isalpha(INPUT_BUFFER[i]) != 0) {
-            isValid = false;
-            break;
+    char buffer[5];
+    printf("[!] Setting the data to the array...\n");
+    CLASS_SET = (int *) malloc(DATA_COUNT * sizeof(int));
+    for (int i = 0; i < DATA_COUNT; i++) {
+        if (fgets(buffer, 4, temp_file) != NULL) {
+            CLASS_SET[i] = atoi(buffer);
         }
     }
 
-    if (isValid) inputVariable = atoi(INPUT_BUFFER);   // turn input char to int
-    else return -1;
-
-    for (int i = 0; i < 100; i++) INPUT_BUFFER[i] = '\0';     // clear input buffer
-    return inputVariable;
+    fclose(temp_file);
+    printf("[!] Previous data loaded\n");
+    printf("============================================================\n");
 }
 
 void GetClassDatas() {
     printf("\n============================================================\n");
 
-    FILE* temp_file_create;     // create temp file to hold input data
-    temp_file_create = fopen("temp.txt", "w");
-    fclose(temp_file_create);
+    // create temp file to hold input data
+    FILE* temp_file_create;
+    temp_file_create = fopen("temp.txt", "r");
     
-    for(int i = 0; i < POPULATION_SIZE; i++){
+    if (temp_file_create == NULL) {
+        temp_file_create = fopen("temp.txt", "w");
+    } fclose(temp_file_create);
+
+    int choice = 0;
+    printf("[!] Load the previous data?\n");
+    printf("[!] (1) yes (2) no \n");
+    printf("[+] Enter here: ");
+    scanf("%i", &choice);
+
+    int iterator = 0;
+    int res = InputValidation(choice); 
+
+    if (res == 1) {
+        LoadPreviousData();
+        iterator = DATA_COUNT;
+    } else {
+        CLASS_SET = (int *) malloc(POPULATION_SIZE * sizeof(int));
+    }
+
+    if (DATA_COUNT > POPULATION_SIZE) {
+        printf("[!] Previous data count is greater than population size.\n");
+        exit(1);
+    }
+
+    printf("\n============================================================\n");
+    for(int i = iterator; i < POPULATION_SIZE; i++){
         FILE* temp_file;
         temp_file = fopen("temp.txt", "a");
 
@@ -108,12 +130,11 @@ void GetClassDatas() {
             printf("[+] Insert Class Content #%d: ", i + 1);
             scanf("%d", &data);            
 
-            int res = InputValidation(data);
-            if (res == -1) {
-                printf("[!] Error: Invalid input.\n");
-            } else {
+            if (InputValidation(data) != -1) {
                 CLASS_SET[i] = data;
                 break;
+            } else {
+                printf("[!] Error: Invalid input.\n");
             } 
         }
 
@@ -121,6 +142,25 @@ void GetClassDatas() {
         fclose(temp_file);
     }
 
+}
+
+int InputValidation(int inputVariable) {
+    bool isValid = true;
+    // fgets(INPUT_BUFFER, 100, stdin);
+    sprintf(INPUT_BUFFER, "%i", inputVariable);
+
+    for (int i = 0; i < 100; i++) {
+        if (isalpha(INPUT_BUFFER[i]) != 0) {
+            isValid = false;
+            break;
+        }
+    }
+
+    if (isValid == true) inputVariable = atoi(INPUT_BUFFER);   // turn input char to int
+    else return -1;
+
+    for (int i = 0; i < 100; i++) INPUT_BUFFER[i] = '\0';     // clear input buffer
+    return inputVariable;
 }
 
 void GetSquaredDeviation() {

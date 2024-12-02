@@ -24,5 +24,7 @@ void GetClassInterval();
 void GetPopulationOrder();
 void GetClassLimits();
 
+int InputValidation();
+
 void GetFileName();
 void CreateFile();
