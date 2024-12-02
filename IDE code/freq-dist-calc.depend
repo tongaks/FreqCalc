@@ -1,0 +1,19 @@
+# depslib dependency file v1.0
+1733103531 source:e:\school\yr1\1st_semester\cc102_computer_programming_i\finals\freq-dist-calc\main.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	<stdint.h>
+	<stdbool.h>
+	<string.h>
+	<ctype.h>
+
+1733083228 source:e:\school\yr1\1st_semester\cc102_computer_programming_i\finals\freq-dist-calc\untitled1.c
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	<stdint.h>
+	<stdbool.h>
+	<string.h>
+	<ctype.h>
+
