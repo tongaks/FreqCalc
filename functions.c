@@ -1,11 +1,14 @@
 #include "functions.h"
-
+    
 int POPULATION_SIZE = 0;
 int CLASS_INTERVAL = 0;
 int CLASS_LIMIT_ORDER = 0;
 int CLASS_WIDTH = 0;
 int CLASS_RANGE = 0;
+char INPUT_BUFFER[100];
 
+
+// arrays
 int *CLASS_SET;
 int *UPPER_LIMITS;
 int *LOWER_LIMITS;
@@ -18,12 +21,16 @@ float *CLASS_MARKS;
 float *MEAN_DEVIATION;
 float *SQUARED_DEVIATION;
 
+// float and integer values
 int MIN_DATA = 0;
 int MAX_DATA = 0;
 float MEAN = 0;
 float STANDARD_DEVIATION = 0;
 float TOTAL_SQUARED_DEVIATION = 0;
 float VARIANCE = 0;
+
+// file handling
+char FILE_NAME[256];
 
 void GetPopulationSize() {
     printf("\n============================================================\n");
@@ -43,12 +50,77 @@ void GetMeanValue() {
     printf("Done\n");
 }
 
+// void LoadPreviousData() {
+//     char choice[2];
+//     printf("[!] Load the previous data?\n");
+//     printf("[+] Y|y or N|n: ");
+//     scanf("%1s", choice);
+
+//     if (strcmp("Y", choice) == 0 || strcmp("y", choice) == 0) {
+//         char buffer[5];
+//         FILE* temp_file;
+//         temp_file = fopen("temp.txt", "r");
+//         if (temp_file == NULL) perror("[!] Failed to open temp file.\n");
+
+//         for(int i = 0; i < POPULATION_SIZE; i++){
+//             while (buffer = fgets(temp_file) != EOF) {
+                
+//             }
+//         }        
+        
+//         fclose(temp_file);
+//     }    
+// }
+
+int InputValidation(int inputVariable) {
+    bool isValid = true;
+    fgets(INPUT_BUFFER, 100, stdin);
+
+    for (int i = 0; i < 100; i++) {
+        if (isalpha(INPUT_BUFFER[i]) != 0) {
+            isValid = false;
+            break;
+        }
+    }
+
+    if (isValid) inputVariable = atoi(INPUT_BUFFER);   // turn input char to int
+    else return -1;
+
+    for (int i = 0; i < 100; i++) INPUT_BUFFER[i] = '\0';     // clear input buffer
+    return inputVariable;
+}
+
 void GetClassDatas() {
     printf("\n============================================================\n");
+
+    FILE* temp_file_create;     // create temp file to hold input data
+    temp_file_create = fopen("temp.txt", "w");
+    fclose(temp_file_create);
+    
     for(int i = 0; i < POPULATION_SIZE; i++){
-        printf("[+] Insert Class Content #%d: ", i + 1);
-        scanf("%d", &CLASS_SET[i]);
+        FILE* temp_file;
+        temp_file = fopen("temp.txt", "a");
+
+        if (temp_file == NULL) perror("[!] Failed to open temp file.\n");
+
+        while (true) {
+            int data = 0;
+            printf("[+] Insert Class Content #%d: ", i + 1);
+            scanf("%d", &data);            
+
+            int res = InputValidation(data);
+            if (res == -1) {
+                printf("[!] Error: Invalid input.\n");
+            } else {
+                CLASS_SET[i] = data;
+                break;
+            } 
+        }
+
+        fprintf(temp_file, "%i ", CLASS_SET[i]);
+        fclose(temp_file);
     }
+
 }
 
 void GetSquaredDeviation() {
@@ -278,4 +350,43 @@ void DisplayFrequencyTable() {
         else
             printf(" %.1lf-%.1lf |\n", LOWER_BOUNDARIES[i], UPPER_BOUNDARIES[i]);
     }
+
+    printf("\n");
+    for (int i = 0; i < 60; i++) {
+        printf("=");
+    } printf("\n\n");
+}
+
+void GetFileName() {
+    char choice[2];
+    printf("[!] Do you want to save the computations?\n");
+    printf("[+]Type Y|y or N|n: ");
+    scanf("%1s", choice);
+
+    if (strcmp("Y", choice) == 0 || strcmp("y", choice) == 0) {
+        printf("\n[+] Enter file name: ");
+        scanf("%s", FILE_NAME);
+        CreateFile();
+    } else return;
+}
+
+void CreateFile() {
+    printf("\n[!] Saving file...\n");
+    FILE* file;
+
+    char full_filename[256];
+    
+    strcpy(full_filename, FILE_NAME);
+    strcat(full_filename, ".txt");
+    file = fopen(full_filename, "w");   
+    
+    fprintf(file, "data = ");
+    for (int i = 0; i < POPULATION_SIZE; i++) {
+        if (i == POPULATION_SIZE - 1) 
+            fprintf(file, "%d", CLASS_SET[i]);
+        else fprintf(file, "%d, ", CLASS_SET[i]);
+    }  fprintf(file, "\n");
+
+    fclose(file);
+    printf("[!] File saved as %s.txt.\n", FILE_NAME);
 }

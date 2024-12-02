@@ -18,5 +18,7 @@ int main() {
 
 	DisplayInterval();
 	DisplayFrequencyTable();
+
+	GetFileName();
 	return 0;
 }

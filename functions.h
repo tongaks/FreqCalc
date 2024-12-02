@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <ctype.h>
 
 int DisplayMainMenu();
 void DisplayTable();
@@ -22,3 +23,6 @@ void GetClassDatas();
 void GetClassInterval();
 void GetPopulationOrder();
 void GetClassLimits();
+
+void GetFileName();
+void CreateFile();
