@@ -7,9 +7,11 @@ int CLASS_WIDTH = 0;
 int CLASS_RANGE = 0;
 char INPUT_BUFFER[100];
 int DATA_COUNT = 0;
+int ITERATOR = 0;
 
 // arrays
 int *CLASS_SET;
+int *TEMP_CLASS_SET;
 int *UPPER_LIMITS;
 int *LOWER_LIMITS;
 int *FREQUENCIES;
@@ -21,7 +23,7 @@ float *CLASS_MARKS;
 float *MEAN_DEVIATION;
 float *SQUARED_DEVIATION;
 
-// float and integer values
+// float and integer values for computations
 int MIN_DATA = 0;
 int MAX_DATA = 0;
 float MEAN = 0;
@@ -37,6 +39,12 @@ void GetPopulationSize() {
     printf("[+] Insert Population Size: ");
     scanf("%d", &POPULATION_SIZE);
 
+    if (DATA_COUNT > POPULATION_SIZE) {
+        printf("[!] Previous data count is greater than the population size.\n");
+        exit(1);
+    }
+
+    CLASS_SET = (int *) malloc(POPULATION_SIZE * sizeof(int));
     printf("[!] The population size is %i\n", POPULATION_SIZE);
 }
 
@@ -62,19 +70,16 @@ void GetPreviousDataCount() {
         } else break;
     } 
 
-    printf("[!] Previous number of data: %i\n", DATA_COUNT);
     fclose(temp_file);
 }
 
 void LoadPreviousData() {
-    GetPreviousDataCount();
     FILE* temp_file;
     temp_file = fopen("temp.txt", "r");
     if (temp_file == NULL) perror("[!] Failed to open temp file.\n");
 
     char buffer[5];
-    printf("[!] Setting the data to the array...\n");
-    CLASS_SET = (int *) malloc(DATA_COUNT * sizeof(int));
+    printf("[!] Setting the data to the list...\n");
     for (int i = 0; i < DATA_COUNT; i++) {
         if (fgets(buffer, 4, temp_file) != NULL) {
             CLASS_SET[i] = atoi(buffer);
@@ -82,8 +87,31 @@ void LoadPreviousData() {
     }
 
     fclose(temp_file);
-    printf("[!] Previous data loaded\n");
+    printf("[!] Previous data loaded.\n");
     printf("============================================================\n");
+}
+
+void AskLoadPreviousData() {
+    printf("\n============================================================\n");
+    GetPreviousDataCount();
+
+    int choice = 0;
+    printf("[!] Load the previous data? (1) yes (2) no\n");
+    printf("[!] Warning: choosing no clears out the previous data.\n");
+    printf("[!] Previous number of data is: %i\n", DATA_COUNT);
+    printf("[+] Enter here: ");
+    scanf("%i", &choice);
+
+    GetPopulationSize();
+
+    if (InputValidation(choice) == 1) {
+        LoadPreviousData();
+        ITERATOR = DATA_COUNT;
+    }
+
+    FILE* clear_temp_file;  // clear temp file
+    clear_temp_file = fopen("temp.txt", "w");
+    fclose(clear_temp_file);
 }
 
 void GetClassDatas() {
@@ -97,33 +125,8 @@ void GetClassDatas() {
         temp_file_create = fopen("temp.txt", "w");
     } fclose(temp_file_create);
 
-    int choice = 0;
-    printf("[!] Load the previous data? (1) yes (2) no\n");
-    printf("[!] Warning: choosing no clears the previous data\n");
-    printf("[+] Enter here: ");
-    scanf("%i", &choice);
-
-    int iterator = 0;
-    int res = InputValidation(choice); 
-
-    if (res == 1) {
-        LoadPreviousData();
-        iterator = DATA_COUNT;
-    } else {
-        CLASS_SET = (int *) malloc(POPULATION_SIZE * sizeof(int));
-    }
-
-    if (DATA_COUNT > POPULATION_SIZE) {
-        printf("[!] Previous data count is greater than population size.\n");
-        exit(1);
-    }
-
-    FILE* clear_temp_file;  // clear temp file
-    clear_temp_file = fopen("temp.txt", "w");
-    fclose(clear_temp_file);
-
     printf("\n============================================================\n");
-    for(int i = iterator; i < POPULATION_SIZE; i++){
+    for(int i = DATA_COUNT; i < POPULATION_SIZE; i++){
         FILE* temp_file;
         temp_file = fopen("temp.txt", "a");
 

@@ -6,11 +6,13 @@
 #include <string.h>
 #include <ctype.h>
 
+// ui related functions
 int DisplayMainMenu();
 void DisplayTable();
 void DisplayInterval();
 void DisplayFrequencyTable();
 
+// computations
 void GetMeanValue();
 void GetStandardDeviation();
 void GetSquaredDeviation();
@@ -26,5 +28,9 @@ void GetClassLimits();
 
 int InputValidation();
 
+// file related functions
 void GetFileName();
 void CreateFile();
+void LoadPreviousData();
+void GetPreviousDataCount();
+void AskLoadPreviousData();

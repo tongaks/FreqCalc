@@ -4,7 +4,7 @@ int main() {
 	int condition = DisplayMainMenu();
 	if (condition == 3) return 0;
 
-	GetPopulationSize();
+	AskLoadPreviousData();
 	GetClassDatas();
 	GetClassInterval();
 	GetPopulationOrder();
