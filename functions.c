@@ -98,8 +98,8 @@ void GetClassDatas() {
     } fclose(temp_file_create);
 
     int choice = 0;
-    printf("[!] Load the previous data?\n");
-    printf("[!] (1) yes (2) no \n");
+    printf("[!] Load the previous data? (1) yes (2) no\n");
+    printf("[!] Warning: choosing no clears the previous data\n");
     printf("[+] Enter here: ");
     scanf("%i", &choice);
 
@@ -117,6 +117,10 @@ void GetClassDatas() {
         printf("[!] Previous data count is greater than population size.\n");
         exit(1);
     }
+
+    FILE* clear_temp_file;  // clear temp file
+    clear_temp_file = fopen("temp.txt", "w");
+    fclose(clear_temp_file);
 
     printf("\n============================================================\n");
     for(int i = iterator; i < POPULATION_SIZE; i++){
