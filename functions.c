@@ -5,13 +5,12 @@ int CLASS_INTERVAL = 0;
 int CLASS_LIMIT_ORDER = 0;
 int CLASS_WIDTH = 0;
 int CLASS_RANGE = 0;
-char INPUT_BUFFER[100];
 int DATA_COUNT = 0;
 int ITERATOR = 0;
+char INPUT_BUFFER[100];
 
 // arrays
 int *CLASS_SET;
-int *TEMP_CLASS_SET;
 int *UPPER_LIMITS;
 int *LOWER_LIMITS;
 int *FREQUENCIES;
@@ -38,11 +37,6 @@ void GetPopulationSize() {
     printf("\n============================================================\n");
     printf("[+] Insert Population Size: ");
     scanf("%d", &POPULATION_SIZE);
-
-    if (DATA_COUNT > POPULATION_SIZE) {
-        printf("[!] Previous data count is greater than the population size.\n");
-        exit(1);
-    }
 
     CLASS_SET = (int *) malloc(POPULATION_SIZE * sizeof(int));
     printf("[!] The population size is %i\n", POPULATION_SIZE);
@@ -105,9 +99,14 @@ void AskLoadPreviousData() {
     GetPopulationSize();
 
     if (InputValidation(choice) == 1) {
+        if (DATA_COUNT > POPULATION_SIZE) {
+           printf("[!] Previous data count is greater than the population size.\n");
+            exit(1);
+        }
+
         LoadPreviousData();
         ITERATOR = DATA_COUNT;
-    }
+    } else DATA_COUNT = 0;
 
     FILE* clear_temp_file;  // clear temp file
     clear_temp_file = fopen("temp.txt", "w");
@@ -436,4 +435,33 @@ void CreateFile() {
 
     fclose(file);
     printf("[!] File saved as %s.txt.\n", FILE_NAME);
+}
+
+void ClearArrayAndVariables() {
+    memset(CLASS_SET, 0, sizeof(CLASS_SET));
+    memset(UPPER_LIMITS, 0, sizeof(UPPER_LIMITS));
+    memset(LOWER_LIMITS, 0, sizeof(LOWER_LIMITS));
+    memset(FREQUENCIES, 0, sizeof(FREQUENCIES));
+    memset(COMMULATIVE_FREQUENCIES, 0, sizeof(COMMULATIVE_FREQUENCIES));
+    memset(UPPER_BOUNDARIES, 0, sizeof(UPPER_BOUNDARIES));
+    memset(LOWER_BOUNDARIES, 0, sizeof(LOWER_BOUNDARIES));
+    memset(CLASS_MARKS, 0, sizeof(CLASS_MARKS));
+    memset(MEAN_DEVIATION, 0, sizeof(MEAN_DEVIATION));
+    memset(SQUARED_DEVIATION, 0, sizeof(SQUARED_DEVIATION));
+
+    POPULATION_SIZE = 0;
+    CLASS_INTERVAL = 0;
+    CLASS_LIMIT_ORDER = 0;
+    CLASS_WIDTH = 0;
+    CLASS_RANGE = 0;
+    DATA_COUNT = 0;
+    ITERATOR = 0;
+    memset(INPUT_BUFFER, 0, sizeof(INPUT_BUFFER));
+
+    MIN_DATA = 0;
+    MAX_DATA = 0;
+    MEAN = 0;
+    STANDARD_DEVIATION = 0;
+    TOTAL_SQUARED_DEVIATION = 0;
+    VARIANCE = 0;
 }

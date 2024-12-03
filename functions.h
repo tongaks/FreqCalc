@@ -26,6 +26,7 @@ void GetClassInterval();
 void GetPopulationOrder();
 void GetClassLimits();
 
+void ClearArrayAndVariables();
 int InputValidation();
 
 // file related functions

@@ -20,5 +20,7 @@ int main() {
 	DisplayFrequencyTable();
 
 	GetFileName();
+	ClearArrayAndVariables();
+	main();
 	return 0;
 }
