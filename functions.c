@@ -35,11 +35,17 @@ char FILE_NAME[256];
 
 void GetPopulationSize() {
     printf("\n============================================================\n");
-    printf("[+] Insert Population Size: ");
-    scanf("%d", &POPULATION_SIZE);
 
-    CLASS_SET = (int *) malloc(POPULATION_SIZE * sizeof(int));
-    printf("[!] The population size is %i\n", POPULATION_SIZE);
+    while (true) {
+        printf("[+] Insert Population Size: ");
+        POPULATION_SIZE = InputValidation(POPULATION_SIZE);
+
+        if (POPULATION_SIZE != -1) {
+            CLASS_SET = (int *) malloc(POPULATION_SIZE * sizeof(int));
+            printf("[!] The population size is %i\n", POPULATION_SIZE);        
+            break;
+        } printf("Invalid input.\n");        
+    }
 }
 
 void GetMeanValue() {
@@ -57,13 +63,13 @@ void GetPreviousDataCount() {
     if (temp_file == NULL) perror("[!] Failed to open temp file.\n");
 
     char buffer[5];
-    printf("[!] Getting the previous number of data...\n");
     while (true) {
         if (fgets(buffer, 4, temp_file) != NULL) {
             DATA_COUNT += 1;
         } else break;
     } 
 
+    printf("[!] Previous data count: %i\n", DATA_COUNT);
     fclose(temp_file);
 }
 
@@ -89,28 +95,39 @@ void AskLoadPreviousData() {
     printf("\n============================================================\n");
     GetPreviousDataCount();
 
-    int choice = 0;
     printf("[!] Load the previous data? (1) yes (2) no\n");
     printf("[!] Warning: choosing no clears out the previous data.\n");
-    printf("[!] Previous number of data is: %i\n", DATA_COUNT);
-    printf("[+] Enter here: ");
-    scanf("%i", &choice);
 
-    GetPopulationSize();
+    while (true) {
+        while (getchar() != '\n');
+        printf("[+] Enter here: ");
+        int res = InputValidation(0);
+        
+        if (res == 1) {
+            GetPopulationSize();
+            if (DATA_COUNT > POPULATION_SIZE) {
+                Warning("Previous data count is greater than the population size.\n");
+                exit(1);
+            } else if (DATA_COUNT == POPULATION_SIZE) {
+                Warning("Previous data count and population is the same. Continueing to computation.");
+                return;
+            }
 
-    if (InputValidation(choice) == 1) {
-        if (DATA_COUNT > POPULATION_SIZE) {
-           printf("[!] Previous data count is greater than the population size.\n");
-            exit(1);
-        }
+            LoadPreviousData();
+            ITERATOR = DATA_COUNT;
+            break;
+        } else if (res == 2) {
+            GetPopulationSize();
+            DATA_COUNT = 0;
+            break;
+        } else printf("Invalid input.\n");
+    }
 
-        LoadPreviousData();
-        ITERATOR = DATA_COUNT;
-    } else DATA_COUNT = 0;
 
     FILE* clear_temp_file;  // clear temp file
     clear_temp_file = fopen("temp.txt", "w");
     fclose(clear_temp_file);
+    GetClassDatas();            
 }
 
 void GetClassDatas() {
@@ -128,21 +145,20 @@ void GetClassDatas() {
     for(int i = DATA_COUNT; i < POPULATION_SIZE; i++){
         FILE* temp_file;
         temp_file = fopen("temp.txt", "a");
-
         if (temp_file == NULL) perror("[!] Failed to open temp file.\n");
 
         while (true) {
-            int data = 0;
             printf("[+] Insert Class Content #%d: ", i + 1);
-            scanf("%d", &data);            
 
-            if (InputValidation(data) != -1) {
-                CLASS_SET[i] = data;
-                break;
+            int res = InputValidation(0);
+            if (res == -1 || res == 0) {
+                Warning("Invalid input.");
             } else {
-                printf("[!] Error: Invalid input.\n");
+                CLASS_SET[i] = res;
+                break;
             } 
         }
+
 
         fprintf(temp_file, "%i ", CLASS_SET[i]);
         fclose(temp_file);
@@ -152,20 +168,18 @@ void GetClassDatas() {
 
 int InputValidation(int inputVariable) {
     bool isValid = true;
-    // fgets(INPUT_BUFFER, 100, stdin);
-    sprintf(INPUT_BUFFER, "%i", inputVariable);
+    fgets(INPUT_BUFFER, 100, stdin);
 
     for (int i = 0; i < 100; i++) {
-        if (isalpha(INPUT_BUFFER[i]) != 0) {
-            isValid = false;
-            break;
-        }
+        if (isalpha(INPUT_BUFFER[i]) == 0) continue;
+        isValid = false;
+        break;
     }
 
-    if (isValid == true) inputVariable = atoi(INPUT_BUFFER);   // turn input char to int
+    if (isValid == true) inputVariable = atoi(INPUT_BUFFER);
     else return -1;
 
-    for (int i = 0; i < 100; i++) INPUT_BUFFER[i] = '\0';     // clear input buffer
+        for (int i = 0; i < 100; i++) INPUT_BUFFER[i] = '\0';     // clear input buffer
     return inputVariable;
 }
 
@@ -280,7 +294,7 @@ void GetCommulativeFrequencies() {
 
         last_val += val;
         COMMULATIVE_FREQUENCIES[i] = last_val;
-    } printf("Done\n");
+    } printf("Done.\n");
 }
 
 void GetClassBoundariesAndClassMarks() {
@@ -293,7 +307,7 @@ void GetClassBoundariesAndClassMarks() {
 
     for (int i = 0; i < CLASS_WIDTH + 1; i++) {
         CLASS_MARKS[i] = (LOWER_BOUNDARIES[i] + UPPER_BOUNDARIES[i]) / 2;
-    } printf("Done\n");
+    } printf("Done.\n");
 }
 
 void GetPopulationOrder() {
@@ -329,11 +343,9 @@ int DisplayMainMenu() {
         printf("\t\tEnter: ");
         scanf("%i", &choice);
 
-        while (getchar() != '\n');
-        if (choice > 3 || choice < 1) {
+        if ((choice > 3 || choice < 1) && InputValidation(choice) != -1) {
             printf("Invalid input.\n");
-            choice = 0;
-            DisplayMainMenu();
+            return -1;
         } else return choice;
     }
 }
@@ -435,6 +447,21 @@ void CreateFile() {
 
     fclose(file);
     printf("[!] File saved as %s.txt.\n", FILE_NAME);
+}
+
+void LoadSavedData() {
+    printf("\n[+] Enter file name: ");
+    scanf("%s", FILE_NAME);
+
+    FILE* check_file;
+    check_file = fopen(FILE_NAME, "r");
+    if (check_file == NULL) {
+        Warning("File not found");
+    } fclose(check_file);
+} 
+
+void Warning(char* msg) {
+    printf("[!] Warning: %s.\n", msg);
 }
 
 void ClearArrayAndVariables() {

@@ -26,6 +26,7 @@ void GetClassInterval();
 void GetPopulationOrder();
 void GetClassLimits();
 
+void Warning(char* msg);
 void ClearArrayAndVariables();
 int InputValidation();
 
@@ -35,3 +36,4 @@ void CreateFile();
 void LoadPreviousData();
 void GetPreviousDataCount();
 void AskLoadPreviousData();
+void LoadSavedData();

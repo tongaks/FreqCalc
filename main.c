@@ -2,10 +2,20 @@
 
 int main() {
 	int condition = DisplayMainMenu();
-	if (condition == 3) return 0;
+	switch (condition) {
+	case 1:
+		break;
+	case 2:
+		LoadPreviousData();
+		break;
+	case 3:
+		return 0;
+	default:
+		main();
+		break;
+	}
 
 	AskLoadPreviousData();
-	GetClassDatas();
 	GetClassInterval();
 	GetPopulationOrder();
 	GetClassLimits();
