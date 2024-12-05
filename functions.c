@@ -57,12 +57,18 @@ void GetMeanValue() {
 }
 
 void GetPreviousDataCount() {
-    printf("\n============================================================\n");
-    FILE* temp_file;
-    temp_file = fopen("temp.txt", "r");
-    if (temp_file == NULL) perror("[!] Failed to open temp file.\n");
+   printf("\n============================================================\n");
+    
+    FILE* check = fopen("temp.txt", "r");
+    if (check == NULL) {
+        printf("[!] Failed to find temp file. Creating...\n");
+        FILE* create = fopen("temp.txt", "w"); fclose(create);        
+        printf("[!] New temp file created.\n");
+        printf("[!] Please open the system again.\n");
+    } fclose(check);
 
     char buffer[5];
+    FILE* temp_file = fopen("temp.txt", "r");
     while (true) {
         if (fgets(buffer, 4, temp_file) != NULL) {
             DATA_COUNT += 1;
@@ -73,20 +79,39 @@ void GetPreviousDataCount() {
     fclose(temp_file);
 }
 
-void LoadPreviousData() {
-    FILE* temp_file;
-    temp_file = fopen("temp.txt", "r");
-    if (temp_file == NULL) perror("[!] Failed to open temp file.\n");
+void CheckTempFile() {
+    FILE* check = fopen("temp.txt", "r");
+    if (check == NULL) {
+        printf("[!] Failed to find temp file. Creating...\n");
+        FILE* create = fopen("temp.txt", "w"); fclose(create);        
+    } fclose(check);
+}
 
-    char buffer[5];
-    printf("[!] Setting the data to the list...\n");
+void LoadPreviousData() {
+    CheckTempFile();
+
+    FILE* temp_file = fopen("temp.txt", "r"); 
+
+    fseek(temp_file, 0, SEEK_END);
+    int file_size = ftell(temp_file);
+    fseek(temp_file, 0, SEEK_SET);
+
+    char buffer[file_size + 1];
+    printf("file size: %i\n", file_size);
+
+    fgets(buffer, file_size + 1, temp_file);
+    fclose(temp_file);
+
     for (int i = 0; i < DATA_COUNT; i++) {
-        if (fgets(buffer, 4, temp_file) != NULL) {
-            CLASS_SET[i] = atoi(buffer);
-        }
+        while (buffer[i])
     }
 
-    fclose(temp_file);
+    for (int i = 0; i < sizeof(buffer); i++) {
+        char number_buffer[10];
+        if (buffer[i] != ' ') printf("%c", buffer[i]);
+        else CLASS_SET[i] = 
+    } printf("\n");
+
     printf("[!] Previous data loaded.\n");
     printf("============================================================\n");
 }
@@ -110,6 +135,7 @@ void AskLoadPreviousData() {
                 exit(1);
             } else if (DATA_COUNT == POPULATION_SIZE) {
                 Warning("Previous data count and population is the same. Continueing to computation.");
+                LoadPreviousData();
                 return;
             }
 
@@ -133,19 +159,19 @@ void AskLoadPreviousData() {
 void GetClassDatas() {
     printf("\n============================================================\n");
 
-    // create temp file to hold input data
-    FILE* temp_file_create;
-    temp_file_create = fopen("temp.txt", "r");
-    
-    if (temp_file_create == NULL) {
-        temp_file_create = fopen("temp.txt", "w");
-    } fclose(temp_file_create);
+    FILE* check = fopen("temp.txt", "r");
+    if (check == NULL) {
+        printf("[!] Failed to find temp file. Creating...\n");
+        FILE* create = fopen("temp.txt", "w"); fclose(create);        
+    } fclose(check);
 
     printf("\n============================================================\n");
     for(int i = DATA_COUNT; i < POPULATION_SIZE; i++){
         FILE* temp_file;
         temp_file = fopen("temp.txt", "a");
-        if (temp_file == NULL) perror("[!] Failed to open temp file.\n");
+        if (temp_file == NULL) {
+            printf("[!] Failed to open temp file.\n");
+        }
 
         while (true) {
             printf("[+] Insert Class Content #%d: ", i + 1);
@@ -418,7 +444,7 @@ void DisplayFrequencyTable() {
 void GetFileName() {
     char choice[2];
     printf("[!] Do you want to save the computations?\n");
-    printf("[+]Type Y|y or N|n: ");
+    printf("[+] Type Y|y or N|n: ");
     scanf("%1s", choice);
 
     if (strcmp("Y", choice) == 0 || strcmp("y", choice) == 0) {
@@ -430,20 +456,26 @@ void GetFileName() {
 
 void CreateFile() {
     printf("\n[!] Saving file...\n");
-    FILE* file;
 
     char full_filename[256];
-    
     strcpy(full_filename, FILE_NAME);
     strcat(full_filename, ".txt");
-    file = fopen(full_filename, "w");   
-    
-    fprintf(file, "data = ");
+    printf("[!] Full filename: %s\n", full_filename);
+
+    FILE* create_file = fopen(full_filename, "w");
+    fclose(create_file);
+
+    FILE* file = fopen(full_filename, "a");
+    if (file == NULL) Warning("File not found.");
+
+    printf("Appending data to the file...\n");
     for (int i = 0; i < POPULATION_SIZE; i++) {
-        if (i == POPULATION_SIZE - 1) 
-            fprintf(file, "%d", CLASS_SET[i]);
-        else fprintf(file, "%d, ", CLASS_SET[i]);
-    }  fprintf(file, "\n");
+        char buffer[256];
+        int val = CLASS_SET[i];
+        sprintf(buffer, "%i ", val);
+        fputs(buffer, file);
+        printf("%i ", val);
+    }
 
     fclose(file);
     printf("[!] File saved as %s.txt.\n", FILE_NAME);

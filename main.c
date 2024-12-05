@@ -15,9 +15,10 @@ int main() {
 		break;
 	}
 
+	CheckTempFile();
 	AskLoadPreviousData();
-	GetClassInterval();
 	GetPopulationOrder();
+	GetClassInterval();
 	GetClassLimits();
 	GetFrequencies();
 	GetCommulativeFrequencies();
