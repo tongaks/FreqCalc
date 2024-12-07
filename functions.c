@@ -98,7 +98,6 @@ void LoadPreviousData() {
     fseek(temp_file, 0, SEEK_SET);
 
     char buffer[file_size + 1];
-    printf("file size: %i\n", file_size);
 
     fgets(buffer, file_size + 1, temp_file);
     fclose(temp_file);
@@ -131,10 +130,10 @@ void AskLoadPreviousData() {
         if (res == 1) {
             GetPopulationSize();
             if (DATA_COUNT > POPULATION_SIZE) {
-                Warning("Previous data count is greater than the population size.\n");
+                Warning("Previous data count is greater than the population size\n");
                 exit(1);
             } else if (DATA_COUNT == POPULATION_SIZE) {
-                Warning("Previous data count and population is the same. Continueing to computation.");
+                Warning("Previous data count and population is the same. Continueing to computation");
                 LoadPreviousData();
                 return;
             }
@@ -273,9 +272,8 @@ void GetClassInterval() {
 
     ANOTHER_UPPER_LIMITS = (int*) malloc((CLASS_WIDTH + 1) * sizeof(int));
 
-    k = (CLASS_RANGE / k);
-
-    CLASS_INTERVAL = round(k);
+    CLASS_INTERVAL = round((CLASS_RANGE / k));
+    printf("interval: %i\n", CLASS_INTERVAL);
     printf("Done\n");
 }
 
@@ -350,10 +348,10 @@ void GetClassBoundariesAndClassMarks() {
 }
 
 void GetPopulationOrder() {
-	printf("\n[!] Selection:   [ 0 Descending Order ]   [ 1 Ascending Order ]\n\n");
+	printf("\n[!] Selection:   (0) Descending Order (1) Ascending Order\n\n");
 
     do {
-        printf("[+] Select Population Order: ");
+        printf("[+] Select sorting order: ");
         scanf("%d", &CLASS_LIMIT_ORDER);
     } while(CLASS_LIMIT_ORDER < 0 || CLASS_LIMIT_ORDER > 1);
 
@@ -410,7 +408,9 @@ void DisplayInterval() {
 }
 
 void DisplayFrequencyTable() {
-    for (int i = 0; i <= CLASS_WIDTH; i++) {
+    int counter = (CLASS_WIDTH > 5) ? CLASS_WIDTH - 1 : CLASS_WIDTH;
+
+    for (int i = 0; i <= counter; i++) {
         if (i == 0) {
             printf("\t  CL ");
             printf("\t  f ");
