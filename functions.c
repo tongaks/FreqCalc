@@ -6,8 +6,6 @@ int CLASS_LIMIT_ORDER = 0;
 int CLASS_WIDTH = 0;
 int CLASS_RANGE = 0;
 int DATA_COUNT = 0;
-int ITERATOR = 0;
-char INPUT_BUFFER[100];
 
 // arrays
 int *CLASS_SET;
@@ -39,13 +37,15 @@ void GetPopulationSize() {
 
     while (true) {
         printf("[+] Insert Population Size: ");
-        POPULATION_SIZE = InputValidation(POPULATION_SIZE);
+        POPULATION_SIZE = InputValidation();
 
         if (POPULATION_SIZE != -1) {
             CLASS_SET = (int *) malloc(POPULATION_SIZE * sizeof(int));
             printf("[!] The population size is %i\n", POPULATION_SIZE);        
             break;
-        } printf("Invalid input.\n");        
+        } else if (POPULATION_SIZE > 5) {
+            printf("Hmmm?\n");
+        } else printf("Invalid input.\n");        
     }
 }
 
@@ -58,15 +58,7 @@ void GetMeanValue() {
 }
 
 void GetPreviousDataCount() {
-   printf("\n============================================================\n");
-    
-    FILE* check = fopen("temp.txt", "r");
-    if (check == NULL) {
-        printf("[!] Failed to find temp file. Creating...\n");
-        FILE* create = fopen("temp.txt", "w"); fclose(create);        
-        printf("[!] New temp file created.\n");
-        printf("[!] Please open the system again.\n");
-    } fclose(check);
+    printf("\n============================================================\n");
 
     char buffer[5];
     FILE* temp_file = fopen("temp.txt", "r");
@@ -74,23 +66,23 @@ void GetPreviousDataCount() {
         if (fgets(buffer, 4, temp_file) != NULL) {
             DATA_COUNT += 1;
         } else break;
-    } 
+    }
 
-    printf("[!] Previous data count: %i\n", DATA_COUNT);
     fclose(temp_file);
 }
 
-void CheckTempFile() {
+bool CheckTempFile() {
     FILE* check = fopen("temp.txt", "r");
     if (check == NULL) {
         printf("[!] Failed to find temp file. Creating...\n");
         FILE* create = fopen("temp.txt", "w"); fclose(create);        
+        printf("[!] temp.txt is created. Please open the system again.\n");
+        exit(1);
     } fclose(check);
+    return true;
 }
 
 void LoadPreviousData() {
-    CheckTempFile();
-
     FILE* temp_file = fopen("temp.txt", "r"); 
 
     fseek(temp_file, 0, SEEK_END);
@@ -98,27 +90,30 @@ void LoadPreviousData() {
     fseek(temp_file, 0, SEEK_SET);
 
     char buffer[file_size + 1];
-
     fgets(buffer, file_size + 1, temp_file);
     fclose(temp_file);
 
-
-    int counter = 0;
     char* token = strtok(buffer, " ");
-    while (token != NULL) {
-        CLASS_SET[counter] = atoi(token);
-        counter++;
-        token = strtok(NULL, " ");
+    for (int i = 0; token != NULL; i++) {
+        CLASS_SET[i] = atoi(token);
+        token = strtok(NULL, " ");        
     }
 
     printf("\n[!] Previous data loaded.\n");
+    DisplayClassSet();
     printf("============================================================\n");
 }
 
 void AskLoadPreviousData() {
-    printf("\n============================================================\n");
     GetPreviousDataCount();
+    if (DATA_COUNT == 0) {
+        while (getchar() != '\n');
+        GetPopulationSize();
+        GetClassDatas();
+        return;        
+    }
 
+    printf("[!] Previous data count: %i\n", DATA_COUNT);
     printf("[!] Load the previous data? (1) yes (2) no\n");
     printf("[!] Warning: choosing no clears out the previous data.\n");
 
@@ -133,19 +128,15 @@ void AskLoadPreviousData() {
                 Warning("Previous data count is greater than the population size\n");
                 exit(1);
             } else if (DATA_COUNT == POPULATION_SIZE) {
-                Warning("Previous data count and population is the same. Continueing to computation");
+                Warning("Previous data count and population is the same. Continuing to computation");
                 LoadPreviousData();
-                return;
-            }
-
-            LoadPreviousData();
-            ITERATOR = DATA_COUNT;
-            break;
+            } break;
         } else if (res == 2) {
             GetPopulationSize();
-            DATA_COUNT = 0;
             break;
-        } else printf("Invalid input.\n");
+        } else {
+            printf("Invalid input. Press enter to try again\n");
+        } 
     }
 
 
@@ -158,20 +149,10 @@ void AskLoadPreviousData() {
 void GetClassDatas() {
     printf("\n============================================================\n");
 
-    FILE* check = fopen("temp.txt", "r");
-    if (check == NULL) {
-        printf("[!] Failed to find temp file. Creating...\n");
-        FILE* create = fopen("temp.txt", "w"); fclose(create);        
-    } fclose(check);
+    CheckTempFile();
 
     printf("\n============================================================\n");
-    for(int i = DATA_COUNT; i < POPULATION_SIZE; i++){
-        FILE* temp_file;
-        temp_file = fopen("temp.txt", "a");
-        if (temp_file == NULL) {
-            printf("[!] Failed to open temp file.\n");
-        }
-
+    for (int i = DATA_COUNT; i < POPULATION_SIZE; i++) {
         while (true) {
             printf("[+] Insert Class Content #%d: ", i + 1);
 
@@ -184,28 +165,20 @@ void GetClassDatas() {
             } 
         }
 
-
+        FILE* temp_file = fopen("temp.txt", "a");
         fprintf(temp_file, "%i ", CLASS_SET[i]);
         fclose(temp_file);
     }
 
 }
 
-int InputValidation(int inputVariable) {
-    bool isValid = true;
-    fgets(INPUT_BUFFER, 100, stdin);
+int InputValidation() {
+    char buffer[100];
+    fgets(buffer, 100, stdin);
 
-    for (int i = 0; i < 100; i++) {
-        if (isalpha(INPUT_BUFFER[i]) == 0) continue;
-        isValid = false;
-        break;
-    }
-
-    if (isValid == true) inputVariable = atoi(INPUT_BUFFER);
-    else return -1;
-
-        for (int i = 0; i < 100; i++) INPUT_BUFFER[i] = '\0';     // clear input buffer
-    return inputVariable;
+    for (int i = 0; i < strlen(buffer); i++) {
+        if (isalpha(buffer[i])) return -1;
+    } return atoi(buffer);
 }
 
 void GetSquaredDeviation() {
@@ -293,10 +266,6 @@ void GetClassLimits() {
         i -= CLASS_INTERVAL;
         iterator++;
     } printf("Done\n");
-
-    for (int i = 0; i < CLASS_WIDTH + 1; i++) {
-        printf("%i ", UPPER_LIMITS[i]);
-    }
 }
 
 void GetFrequencies() {
@@ -334,13 +303,9 @@ void GetCommulativeFrequencies() {
 void GetClassBoundariesAndClassMarks() {
     printf("Computing class boundary and class mark... ");
     for (int i = 0; i < POPULATION_SIZE; i++) {
-        // int lower_bound = LOWER_LIMITS[i] - 0.5;
-        // int upper_bound = UPPER_LIMITS[i] + 0.5;
-
         UPPER_BOUNDARIES[i] = UPPER_LIMITS[i] + 0.5;
         LOWER_BOUNDARIES[i] = LOWER_LIMITS[i] - 0.5;
     }
-   
 
     for (int i = 0; i < CLASS_WIDTH + 1; i++) {
         CLASS_MARKS[i] = (LOWER_BOUNDARIES[i] + UPPER_BOUNDARIES[i]) / 2;
@@ -355,24 +320,21 @@ void GetPopulationOrder() {
         scanf("%d", &CLASS_LIMIT_ORDER);
     } while(CLASS_LIMIT_ORDER < 0 || CLASS_LIMIT_ORDER > 1);
 
-    for (int i = 0; i < 60; i++) {
-        printf("=");
-    } printf("\n");
+    for (int i = 0; i < 60; i++) printf("=");
+    printf("\n");
 }
 
 int DisplayMainMenu() {
     while (true) {
         int choice = 0;
 
-        for (int i = 0; i < 60; i++) {
-            printf("=");
-        } printf("\n");
+        for (int i = 0; i < 60; i++) printf("=");
+        printf("\n");
 
         printf("\tFrequency Distribution Table Calculator\n");
 
-        for (int i = 0; i < 60; i++) {
-            printf("=");
-        } printf("\n");
+        for (int i = 0; i < 60; i++) printf("=");
+        printf("\n");
 
         printf("\t\t(1) New table\n");
         printf("\t\t(2) Open existing table\n");
@@ -382,7 +344,7 @@ int DisplayMainMenu() {
 
         if ((choice > 3 || choice < 1) && InputValidation(choice) != -1) {
             printf("Invalid input.\n");
-            return -1;
+            continue;
         } else return choice;
     }
 }
@@ -407,10 +369,16 @@ void DisplayInterval() {
 	} printf("\n\n");
 }
 
-void DisplayFrequencyTable() {
-    int counter = (CLASS_WIDTH > 5) ? CLASS_WIDTH - 1 : CLASS_WIDTH;
+void DisplayClassSet() {
+    printf("[!] Dataset:\n");
+    for (int i = 0; i < POPULATION_SIZE; i++) {
+        if (i == POPULATION_SIZE - 1) printf("%i ", CLASS_SET[i]);
+        else printf("%i, ", CLASS_SET[i]);
+    } printf("\n");
+}
 
-    for (int i = 0; i <= counter; i++) {
+void DisplayTable() {
+    for (int i = 0; i < CLASS_WIDTH + 1; i++) {
         if (i == 0) {
             printf("\t  CL ");
             printf("\t  f ");
@@ -478,13 +446,11 @@ void CreateFile() {
     FILE* file = fopen(full_filename, "a");
     if (file == NULL) Warning("File not found.");
 
-    printf("Appending data to the file...\n");
     for (int i = 0; i < POPULATION_SIZE; i++) {
         char buffer[256];
         int val = CLASS_SET[i];
         sprintf(buffer, "%i ", val);
         fputs(buffer, file);
-        printf("%i ", val);
     }
 
     fclose(file);
@@ -494,13 +460,7 @@ void CreateFile() {
 void LoadSavedData() {
     printf("\n[+] Enter file name: ");
     scanf("%s", FILE_NAME);
-
-    FILE* check_file;
-    check_file = fopen(FILE_NAME, "r");
-    if (check_file == NULL) {
-        Warning("File not found");
-    } fclose(check_file);
-} 
+}
 
 void Warning(char* msg) {
     printf("[!] Warning: %s.\n", msg);
@@ -524,8 +484,6 @@ void ClearArrayAndVariables() {
     CLASS_WIDTH = 0;
     CLASS_RANGE = 0;
     DATA_COUNT = 0;
-    ITERATOR = 0;
-    memset(INPUT_BUFFER, 0, sizeof(INPUT_BUFFER));
 
     MIN_DATA = 0;
     MAX_DATA = 0;

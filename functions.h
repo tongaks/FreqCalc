@@ -9,8 +9,9 @@
 // ui related functions
 int DisplayMainMenu();
 void DisplayTable();
+void DisplayClassSet();
 void DisplayInterval();
-void DisplayFrequencyTable();
+void DisplayTable();
 
 // computations
 void GetMeanValue();
@@ -31,7 +32,7 @@ void ClearArrayAndVariables();
 int InputValidation();
 
 // file related functions
-void CheckTempFile();
+bool CheckTempFile();
 void GetFileName();
 void CreateFile();
 void LoadPreviousData();

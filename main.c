@@ -6,7 +6,7 @@ int main() {
 	case 1:
 		break;
 	case 2:
-		LoadPreviousData();
+		LoadSavedData();
 		break;
 	case 3:
 		return 0;
@@ -15,7 +15,7 @@ int main() {
 		break;
 	}
 
-	CheckTempFile();
+	if (!CheckTempFile()) return 0;
 	AskLoadPreviousData();
 	GetPopulationOrder();
 	GetClassInterval();
@@ -28,7 +28,7 @@ int main() {
 	GetVarianceValue();
 
 	DisplayInterval();
-	DisplayFrequencyTable();
+	DisplayTable();
 
 	GetFileName();
 	ClearArrayAndVariables();
