@@ -132,6 +132,8 @@ void AskLoadPreviousData() {
                 LoadPreviousData();
             } break;
         } else if (res == 2) {
+            DATA_COUNT = 0;
+            printf("Calling get popsize\n");
             GetPopulationSize();
             break;
         } else {
