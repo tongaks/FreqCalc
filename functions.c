@@ -120,22 +120,29 @@ bool AskLoadPreviousData() {
                     char err[] = "Failed to load previous data.$$Press any key to try again.";
                     TUI(err);
                     getchar(); continue;                                        
-                }
-            }  break;
+                } else return false;        // only not call GetClassDatas when the same data count and popsize
+            }  
+
+            LoadPreviousData(); 
+            return true;
+
         } else if (res == 2) {
+            ClearTempFile();
             DATA_COUNT = 0;
             return true;        // if true GetClassDatas
         }
-    }  return false;
+
+    }
 }
 
 void ClearTempFile() {
-    
+    FILE* temp_file = fopen("temp.txt", "w");
+    fclose(temp_file);
 }
 
 void GetClassDatas() {
     CheckTempFile();
-    for (int i = 0; i < POPULATION_SIZE; i++) CLASS_SET[i] = 0;
+    for (int i = DATA_COUNT; i < POPULATION_SIZE; i++) CLASS_SET[i] = 0;
 
     for (int i = DATA_COUNT; i < POPULATION_SIZE; i++) {
         while (true) {

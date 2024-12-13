@@ -34,6 +34,7 @@ void ClearArrayAndVariables();
 int InputValidation();
 
 // file related functions
+void ClearTempFile();
 bool CheckTempFile();
 void GetFileName();
 void CreateFile();
