@@ -9,7 +9,6 @@ int DATA_COUNT = 0;
 
 // arrays
 int *CLASS_SET;
-int *ANOTHER_UPPER_LIMITS;
 int *UPPER_LIMITS;
 int *LOWER_LIMITS;
 int *FREQUENCIES;
@@ -33,42 +32,30 @@ float VARIANCE = 0;
 char FILE_NAME[256];
 
 void GetPopulationSize() {
-    printf("\n============================================================\n");
-
     while (true) {
-        printf("[+] Insert Population Size: ");
+        TUI("[+] Insert Population Size: ");
         POPULATION_SIZE = InputValidation();
 
-        if (POPULATION_SIZE != -1) {
-            CLASS_SET = (int *) malloc(POPULATION_SIZE * sizeof(int));
-            printf("[!] The population size is %i\n", POPULATION_SIZE);        
-            break;
-        } else if (POPULATION_SIZE > 5) {
-            printf("Hmmm?\n");
-        } else printf("Invalid input.\n");        
+        if (POPULATION_SIZE > 0) break;
     }
+
+    CLASS_SET = (int *) malloc(POPULATION_SIZE * sizeof(int));
 }
 
 void GetMeanValue() {
-    printf("Computing mean... ");
     for (int i = 0; i < POPULATION_SIZE; i++) {
         MEAN += CLASS_SET[i];
     }  MEAN /= 2;
-    printf("Done\n");
 }
 
 void GetPreviousDataCount() {
-    printf("\n============================================================\n");
-
     char buffer[5];
     FILE* temp_file = fopen("temp.txt", "r");
     while (true) {
         if (fgets(buffer, 4, temp_file) != NULL) {
             DATA_COUNT += 1;
         } else break;
-    }
-
-    fclose(temp_file);
+    } fclose(temp_file);
 }
 
 bool CheckTempFile() {
@@ -77,15 +64,17 @@ bool CheckTempFile() {
         printf("[!] Failed to find temp file. Creating...\n");
         FILE* create = fopen("temp.txt", "w"); fclose(create);        
         printf("[!] temp.txt is created. Please open the system again.\n");
-        exit(1);
+        return false;
     } fclose(check);
     return true;
 }
 
-void LoadPreviousData() {
+bool LoadPreviousData() {
+    if (CheckTempFile() == false) return false;
+
     FILE* temp_file = fopen("temp.txt", "r"); 
 
-    fseek(temp_file, 0, SEEK_END);
+    fseek(temp_file, 0, SEEK_END);      // get file size
     int file_size = ftell(temp_file);
     fseek(temp_file, 0, SEEK_SET);
 
@@ -97,74 +86,75 @@ void LoadPreviousData() {
     for (int i = 0; token != NULL; i++) {
         CLASS_SET[i] = atoi(token);
         token = strtok(NULL, " ");        
-    }
-
-    printf("\n[!] Previous data loaded.\n");
-    DisplayClassSet();
-    printf("============================================================\n");
+    } return true;
 }
 
-void AskLoadPreviousData() {
+bool AskLoadPreviousData() {
     GetPreviousDataCount();
     if (DATA_COUNT == 0) {
-        while (getchar() != '\n');
-        GetPopulationSize();
-        GetClassDatas();
-        return;        
+        GetPopulationSize();    
+        return true;
     }
 
-    printf("[!] Previous data count: %i\n", DATA_COUNT);
-    printf("[!] Load the previous data? (1) yes (2) no\n");
-    printf("[!] Warning: choosing no clears out the previous data.\n");
+    int res = 0;
+    while (true) {
+        char text[512];
+        snprintf(text, sizeof(text), "Previous data count: %i", DATA_COUNT);
+        strncat(text, "$$Load previos data?$$(1) Yes$$(2) No", sizeof(text) - strlen(text) - 1);
+        TUI(text);
+
+        res = InputValidation();
+        if (res > 2 || res < 1) continue;
+        else break;
+    }
 
     while (true) {
-        while (getchar() != '\n');
-        printf("[+] Enter here: ");
-        int res = InputValidation(0);
-        
+        GetPopulationSize();
         if (res == 1) {
-            GetPopulationSize();
             if (DATA_COUNT > POPULATION_SIZE) {
-                Warning("Previous data count is greater than the population size\n");
-                exit(1);
+                char err[] = "Population size is less than the previous data count.$$Press any key to try again.";
+                TUI(err);
+                getchar(); continue;
             } else if (DATA_COUNT == POPULATION_SIZE) {
-                Warning("Previous data count and population is the same. Continuing to computation");
-                LoadPreviousData();
-            } break;
+                if (LoadPreviousData() == false) {
+                    char err[] = "Failed to load previous data.$$Press any key to try again.";
+                    TUI(err);
+                    getchar(); continue;                                        
+                }
+            }  break;
         } else if (res == 2) {
             DATA_COUNT = 0;
-            printf("Calling get popsize\n");
-            GetPopulationSize();
-            break;
-        } else {
-            printf("Invalid input. Press enter to try again\n");
-        } 
-    }
+            return true;        // if true GetClassDatas
+        }
+    }  return false;
+}
 
-
-    FILE* clear_temp_file;  // clear temp file
-    clear_temp_file = fopen("temp.txt", "w");
-    fclose(clear_temp_file);
-    GetClassDatas();            
+void ClearTempFile() {
+    
 }
 
 void GetClassDatas() {
-    printf("\n============================================================\n");
-
     CheckTempFile();
+    for (int i = 0; i < POPULATION_SIZE; i++) CLASS_SET[i] = 0;
 
-    printf("\n============================================================\n");
     for (int i = DATA_COUNT; i < POPULATION_SIZE; i++) {
         while (true) {
-            printf("[+] Insert Class Content #%d: ", i + 1);
+            char text[128];
+            snprintf(text, sizeof(text), "[+] Insert Class Content #%d: ", i + 1);
+            TUI(text);
+
+            printf("\t\t"); // note: pag 12 new line print na sa new line para malinis
+            for (int d = 0; d < POPULATION_SIZE; d++) {
+                if (d % 12 == 0) printf("\n\t\t");
+                    printf("[%i] ", CLASS_SET[d]);
+            } printf("\n\n");
+
 
             int res = InputValidation(0);
-            if (res == -1 || res == 0) {
-                Warning("Invalid input.");
-            } else {
+            if (res > 0) {
                 CLASS_SET[i] = res;
                 break;
-            } 
+            }
         }
 
         FILE* temp_file = fopen("temp.txt", "a");
@@ -176,7 +166,9 @@ void GetClassDatas() {
 
 int InputValidation() {
     char buffer[100];
+    printf("\t[+] Enter here: ");
     fgets(buffer, 100, stdin);
+    buffer[strcspn(buffer, "\n")] = '\0';
 
     for (int i = 0; i < strlen(buffer); i++) {
         if (isalpha(buffer[i])) return -1;
@@ -184,7 +176,6 @@ int InputValidation() {
 }
 
 void GetSquaredDeviation() {
-    printf("Computing Squared SD... ");
     for (int i = 0; i < CLASS_WIDTH + 1; i++) {
         SQUARED_DEVIATION[i] = abs(MEAN_DEVIATION[i] * MEAN_DEVIATION[i]);
     }
@@ -195,24 +186,20 @@ void GetSquaredDeviation() {
 }
 
 void GetStandardDeviation() {
-    printf("Computing SD... ");
     for (int i = 0; i < CLASS_WIDTH + 1; i++) {
         MEAN_DEVIATION[i] = CLASS_SET[i] - MEAN;
     }
 
     GetSquaredDeviation();
     STANDARD_DEVIATION = sqrt(TOTAL_SQUARED_DEVIATION / POPULATION_SIZE);
-    printf("Done\n");
+   
 }
 
 void GetVarianceValue() {
-    printf("Computing Variance... ");
     VARIANCE = TOTAL_SQUARED_DEVIATION / POPULATION_SIZE;
-    printf("Done\n");
 }
 
 void GetClassInterval() {
-    printf("Computing class interval... ");
 	int minData = CLASS_SET[0];
     int maxData = CLASS_SET[0];
     double k = 0;				// class width
@@ -233,7 +220,6 @@ void GetClassInterval() {
     k = 1.0 + (3.3 * (log10(POPULATION_SIZE)));
 
     CLASS_WIDTH = round(k);
-    printf("Class widht: %i\n", CLASS_WIDTH);
 
     COMMULATIVE_FREQUENCIES = (int *) malloc((CLASS_WIDTH + 1) * sizeof(int));
     FREQUENCIES = (int *) malloc((CLASS_WIDTH + 1) * sizeof(int));
@@ -245,15 +231,10 @@ void GetClassInterval() {
     MEAN_DEVIATION = (float *) malloc((CLASS_WIDTH + 1) * sizeof(float));
     SQUARED_DEVIATION = (float *) malloc((CLASS_WIDTH + 1) * sizeof(float));
 
-    ANOTHER_UPPER_LIMITS = (int*) malloc((CLASS_WIDTH + 1) * sizeof(int));
-
-    CLASS_INTERVAL = round((CLASS_RANGE / k));
-    printf("interval: %i\n", CLASS_INTERVAL);
-    printf("Done\n");
+    CLASS_INTERVAL = round((CLASS_RANGE / k));   
 }
 
 void GetClassLimits() {
-    printf("Computing class limit... ");
     UPPER_LIMITS = (int *) malloc((CLASS_WIDTH + 1) * sizeof(int));
     LOWER_LIMITS = (int *) malloc((CLASS_WIDTH + 1) * sizeof(int));
 
@@ -267,11 +248,10 @@ void GetClassLimits() {
 
         i -= CLASS_INTERVAL;
         iterator++;
-    } printf("Done\n");
+    }
 }
 
 void GetFrequencies() {
-    printf("Computing frequencies... ");
     for (int d = 0; d < CLASS_WIDTH + 1; d++) {
         int freq = 0;
         
@@ -281,29 +261,22 @@ void GetFrequencies() {
             }
         }
 
-        for (int i = 0; i < CLASS_WIDTH + 1; i++) {
-            ANOTHER_UPPER_LIMITS[i] = UPPER_LIMITS[i];
-        }
-
         FREQUENCIES[d] = freq;
         freq = 0;
-    } printf("Done\n");
+    }
 }
 
 void GetCommulativeFrequencies() {
-    printf("Computing commulative frequencies...   ");
-
     int last_val = 0;
     for (int i = 0; i <= CLASS_WIDTH + 1; i++) {
         int val = FREQUENCIES[i];
 
         last_val += val;
         COMMULATIVE_FREQUENCIES[i] = last_val;
-    } printf("Done.\n");
+    }
 }
 
 void GetClassBoundariesAndClassMarks() {
-    printf("Computing class boundary and class mark... ");
     for (int i = 0; i < POPULATION_SIZE; i++) {
         UPPER_BOUNDARIES[i] = UPPER_LIMITS[i] + 0.5;
         LOWER_BOUNDARIES[i] = LOWER_LIMITS[i] - 0.5;
@@ -311,44 +284,26 @@ void GetClassBoundariesAndClassMarks() {
 
     for (int i = 0; i < CLASS_WIDTH + 1; i++) {
         CLASS_MARKS[i] = (LOWER_BOUNDARIES[i] + UPPER_BOUNDARIES[i]) / 2;
-    } printf("Done.\n");
+    }
 }
 
 void GetPopulationOrder() {
-	printf("\n[!] Selection:   (0) Descending Order (1) Ascending Order\n\n");
-
     do {
-        printf("[+] Select sorting order: ");
-        scanf("%d", &CLASS_LIMIT_ORDER);
+        char text[] = "Select order$$(0) Descending Order (1) Ascending Order";
+        TUI(text);
+        CLASS_LIMIT_ORDER = InputValidation();
     } while(CLASS_LIMIT_ORDER < 0 || CLASS_LIMIT_ORDER > 1);
-
-    for (int i = 0; i < 60; i++) printf("=");
-    printf("\n");
 }
 
 int DisplayMainMenu() {
+    int choice = 0;
     while (true) {
-        int choice = 0;
+        char text[] = "Frequency Distribution Calculator$$Made by Denina & zantoa$$(1) New table$$(2) Open table$$(3) Exit";
+        TUI(text);
+        choice = InputValidation();
 
-        for (int i = 0; i < 60; i++) printf("=");
-        printf("\n");
-
-        printf("\tFrequency Distribution Table Calculator\n");
-
-        for (int i = 0; i < 60; i++) printf("=");
-        printf("\n");
-
-        printf("\t\t(1) New table\n");
-        printf("\t\t(2) Open existing table\n");
-        printf("\t\t(3) Exit\n");
-        printf("\t\tEnter: ");
-        scanf("%i", &choice);
-
-        if ((choice > 3 || choice < 1) && InputValidation(choice) != -1) {
-            printf("Invalid input.\n");
-            continue;
-        } else return choice;
-    }
+        if (choice < 4 && choice > 0) break;
+    } return choice;
 }
 
 void DisplayInterval() {

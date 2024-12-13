@@ -27,6 +27,8 @@ void GetClassInterval();
 void GetPopulationOrder();
 void GetClassLimits();
 
+int StringCount(const char* str);
+void TUI(char* str);
 void Warning(char* msg);
 void ClearArrayAndVariables();
 int InputValidation();
@@ -35,7 +37,7 @@ int InputValidation();
 bool CheckTempFile();
 void GetFileName();
 void CreateFile();
-void LoadPreviousData();
+bool LoadPreviousData();
 void GetPreviousDataCount();
-void AskLoadPreviousData();
+bool AskLoadPreviousData();
 void LoadSavedData();

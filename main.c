@@ -15,8 +15,8 @@ int main() {
 		break;
 	}
 
-	if (!CheckTempFile()) return 0;
-	AskLoadPreviousData();
+	if (CheckTempFile() == false) return 0;
+	if (AskLoadPreviousData()) GetClassDatas();
 	GetPopulationOrder();
 	GetClassInterval();
 	GetClassLimits();

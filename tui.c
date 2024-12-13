@@ -13,7 +13,8 @@ int StringCount(const char* str) {
 
 void TUI(char* string) {
     system("clear");
-    int count = StringCount(string);
+    const char* str = string; 
+    int count = StringCount(str);
     int width = 72;
     char strings[count][512];
 
