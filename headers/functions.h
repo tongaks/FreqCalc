@@ -37,7 +37,7 @@ int InputValidation();
 void ClearTempFile();
 bool CheckTempFile();
 void GetFileName();
-void CreateFile();
+bool CreateFile();
 bool LoadPreviousData();
 void GetPreviousDataCount();
 bool AskLoadPreviousData();

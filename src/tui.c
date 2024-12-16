@@ -1,4 +1,4 @@
-#include "functions.h"
+#include "../headers/functions.h"
 
 int StringCount(const char* str) {
     int count = 0;

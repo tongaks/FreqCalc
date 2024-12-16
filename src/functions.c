@@ -1,4 +1,4 @@
-#include "functions.h"
+#include "../headers/functions.h"
     
 int POPULATION_SIZE = 0;
 int CLASS_INTERVAL = 0;
@@ -127,7 +127,7 @@ bool AskLoadPreviousData() {
             return true;
 
         } else if (res == 2) {
-            ClearTempFile();
+            ClearTempFile();    // clear temp file for new temp datas
             DATA_COUNT = 0;
             return true;        // if true GetClassDatas
         }
@@ -142,8 +142,8 @@ void ClearTempFile() {
 
 void GetClassDatas() {
     CheckTempFile();
-    for (int i = DATA_COUNT; i < POPULATION_SIZE; i++) CLASS_SET[i] = 0;
 
+    for (int i = DATA_COUNT; i < POPULATION_SIZE; i++) CLASS_SET[i] = 0;
     for (int i = DATA_COUNT; i < POPULATION_SIZE; i++) {
         while (true) {
             char text[128];
@@ -381,34 +381,37 @@ void DisplayTable() {
     for (int i = 0; i < 60; i++) {
         printf("=");
     } printf("\n\n");
+
+    printf("Press any key to continue.\n");
+    getchar();
 }
 
 void GetFileName() {
-    char choice[2];
-    printf("[!] Do you want to save the computations?\n");
-    printf("[+] Type Y|y or N|n: ");
-    scanf("%1s", choice);
+    char text[] = "Do you want to save the computations?$$(1) Yes (2) No";
+    TUI(text);
+    int res = InputValidation();
 
-    if (strcmp("Y", choice) == 0 || strcmp("y", choice) == 0) {
-        printf("\n[+] Enter file name: ");
+    if (res == 1) {
+        TUI("Enter the file name");
+        printf("\t[+] Enter here: ");
         scanf("%s", FILE_NAME);
+        
         CreateFile();
-    } else return;
+        char text[] = "Saved successfully.$$Press any key to continue.";
+        TUI(text);
+        getchar();
+    }
 }
 
-void CreateFile() {
-    printf("\n[!] Saving file...\n");
-
+bool CreateFile() {
     char full_filename[256];
     strcpy(full_filename, FILE_NAME);
     strcat(full_filename, ".txt");
-    printf("[!] Full filename: %s\n", full_filename);
 
     FILE* create_file = fopen(full_filename, "w");
     fclose(create_file);
 
     FILE* file = fopen(full_filename, "a");
-    if (file == NULL) Warning("File not found.");
 
     for (int i = 0; i < POPULATION_SIZE; i++) {
         char buffer[256];
@@ -418,16 +421,12 @@ void CreateFile() {
     }
 
     fclose(file);
-    printf("[!] File saved as %s.txt.\n", FILE_NAME);
+    return true;
 }
 
 void LoadSavedData() {
-    printf("\n[+] Enter file name: ");
+    TUI("Enter file name");
     scanf("%s", FILE_NAME);
-}
-
-void Warning(char* msg) {
-    printf("[!] Warning: %s.\n", msg);
 }
 
 void ClearArrayAndVariables() {
