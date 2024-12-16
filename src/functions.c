@@ -1,5 +1,5 @@
 #include "../headers/functions.h"
-    
+
 int POPULATION_SIZE = 0;
 int CLASS_INTERVAL = 0;
 int CLASS_LIMIT_ORDER = 0;
@@ -419,6 +419,9 @@ bool CreateFile() {
         sprintf(buffer, "%i ", val);
         fputs(buffer, file);
     }
+
+    CreateExcelFile(FILE_NAME, CLASS_WIDTH, LOWER_LIMITS, UPPER_LIMITS, FREQUENCIES, 
+                 COMMULATIVE_FREQUENCIES, CLASS_MARKS, LOWER_BOUNDARIES, UPPER_BOUNDARIES);
 
     fclose(file);
     return true;

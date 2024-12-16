@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
+#include "xlsxwriter.h"
 
 // ui related functions
 int DisplayMainMenu();
@@ -34,6 +35,9 @@ void ClearArrayAndVariables();
 int InputValidation();
 
 // file related functions
+void CreateExcelFile(char* file_name, int class_width, int* lower_limits, int* upper_limits, 
+                       int* frequencies, int* commulative_frequencies, float* class_marks, 
+                       float* lower_boundaries, float* upper_boundaries);
 void ClearTempFile();
 bool CheckTempFile();
 void GetFileName();
