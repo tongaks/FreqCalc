@@ -49,13 +49,23 @@ void GetMeanValue() {
 }
 
 void GetPreviousDataCount() {
-    char buffer[5];
+    char buffer[1000];  // Increase size if needed
     FILE* temp_file = fopen("temp.txt", "r");
-    while (true) {
-        if (fgets(buffer, 4, temp_file) != NULL) {
-            DATA_COUNT += 1;
-        } else break;
-    } fclose(temp_file);
+    
+    if (temp_file == NULL) {
+        printf("Failed to open file.\n");
+        return;
+    }
+
+    fread(buffer, sizeof(char), sizeof(buffer) - 1, temp_file);
+    buffer[sizeof(buffer) - 1] = '\0';  // Null-terminate buffer
+    fclose(temp_file);
+
+    char* token = strtok(buffer, " ");
+    while (token != NULL) {
+        DATA_COUNT += 1;
+        token = strtok(NULL, " ");
+    }
 }
 
 bool CheckTempFile() {
@@ -242,20 +252,29 @@ void GetClassInterval() {
 }
 
 void GetClassLimits() {
-    UPPER_LIMITS = (int *) malloc((CLASS_WIDTH + 1) * sizeof(int));
-    LOWER_LIMITS = (int *) malloc((CLASS_WIDTH + 1) * sizeof(int));
+    UPPER_LIMITS = (int *) calloc((CLASS_WIDTH + 1), sizeof(int));
+    LOWER_LIMITS = (int *) calloc((CLASS_WIDTH + 1), sizeof(int));
+
+    for (int i = 0; i < CLASS_WIDTH + 1; i++) {
+        UPPER_LIMITS[i] = 0;
+        LOWER_LIMITS[i] = 0;
+    }
 
     int iterator = 0;
-    for (int i = MAX_DATA; i > CLASS_WIDTH + 1;) {
-    	int UpperBound = i;
+    for (int i = MAX_DATA; iterator < CLASS_WIDTH + 1; iterator++) {
+        int UpperBound = i;
         int LowerBound = i - (CLASS_INTERVAL - 1);
 
         UPPER_LIMITS[iterator] = UpperBound;
         LOWER_LIMITS[iterator] = LowerBound;
 
-        i -= CLASS_INTERVAL;
-        iterator++;
+        i -= CLASS_INTERVAL; // Decrement by CLASS_INTERVAL
     }
+
+    printf("clas width: %i\n", CLASS_WIDTH);
+    for (int i = 0; i < CLASS_WIDTH + 1; i++) {
+        printf("%i\n", UPPER_LIMITS[i]);
+    } getchar();
 }
 
 void GetFrequencies() {
@@ -275,7 +294,7 @@ void GetFrequencies() {
 
 void GetCommulativeFrequencies() {
     int last_val = 0;
-    for (int i = 0; i <= CLASS_WIDTH + 1; i++) {
+    for (int i = 0; i < CLASS_WIDTH + 1; i++) {
         int val = FREQUENCIES[i];
 
         last_val += val;
@@ -284,7 +303,7 @@ void GetCommulativeFrequencies() {
 }
 
 void GetClassBoundariesAndClassMarks() {
-    for (int i = 0; i < POPULATION_SIZE; i++) {
+    for (int i = 0; i < CLASS_WIDTH + 1; i++) {
         UPPER_BOUNDARIES[i] = UPPER_LIMITS[i] + 0.5;
         LOWER_BOUNDARIES[i] = LOWER_LIMITS[i] - 0.5;
     }
@@ -342,6 +361,8 @@ void DisplayClassSet() {
 }
 
 void DisplayTable() {
+    printf("Class width: %i\n", CLASS_WIDTH);
+    printf("UPPER_LIMITS size: %li\n", sizeof(UPPER_LIMITS));
     for (int i = 0; i < CLASS_WIDTH + 1; i++) {
         if (i == 0) {
             printf("\t  CL ");
@@ -350,6 +371,8 @@ void DisplayTable() {
             printf("  Xm ");
             printf("\t CB \n");
         }
+
+        if (FREQUENCIES[i] == 0) break;
 
         if (!(LOWER_LIMITS[i] < 10 || UPPER_LIMITS[i] < 10)) {
             printf("\t| %i-%i |", LOWER_LIMITS[i], UPPER_LIMITS[i]);     
