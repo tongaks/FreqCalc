@@ -45,4 +45,4 @@ bool CreateFile();
 bool LoadPreviousData();
 void GetPreviousDataCount();
 bool AskLoadPreviousData();
-void LoadSavedData();
+bool LoadSavedData();

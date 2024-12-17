@@ -270,11 +270,6 @@ void GetClassLimits() {
 
         i -= CLASS_INTERVAL; // Decrement by CLASS_INTERVAL
     }
-
-    printf("clas width: %i\n", CLASS_WIDTH);
-    for (int i = 0; i < CLASS_WIDTH + 1; i++) {
-        printf("%i\n", UPPER_LIMITS[i]);
-    } getchar();
 }
 
 void GetFrequencies() {
@@ -450,10 +445,61 @@ bool CreateFile() {
     return true;
 }
 
-void LoadSavedData() {
+bool LoadSavedData() {
+    char file_name[100];
+    char full_file_name[200];
     TUI("Enter file name");
-    scanf("%s", FILE_NAME);
+    printf("\t[+] Enter here: ");
+    scanf("%s", file_name);
+
+    snprintf(full_file_name, sizeof(full_file_name), "%s.txt", file_name);
+    FILE* file = fopen(full_file_name, "r");
+    if (file == NULL) {
+        char err[] = "File not found$$Press any key to go to main menu"; 
+        TUI(err);
+        getchar();
+        return false;
+    } 
+
+    fseek(file, 0, SEEK_END);
+    int file_size = ftell(file);
+    if (file_size <= 0) {
+        fclose(file);
+        char err[] = "File is empty$$Press any key to go to main menu"; 
+        TUI(err);
+        getchar();
+        return false;
+    }
+
+    fseek(file, 0, SEEK_SET);
+
+    char buffer[file_size + 1]; // Dynamically allocate memory
+    if (buffer == NULL) {
+        fclose(file);
+        TUI("Memory allocation failed$$Press any key to go to main menu");
+        getchar();
+        return false;
+    }
+
+    fread(buffer, sizeof(buffer), file_size, file);
+    buffer[file_size] = '\0'; // Null-terminate the buffer
+    fclose(file);
+
+    GetPreviousDataCount();
+    char text[256];
+    snprintf(text, sizeof(text), "Previous data count: %i", DATA_COUNT);
+    TUI(text); getchar();getchar();
+    GetPopulationSize();
+
+    char* token = strtok(buffer, " ");    
+    int i = 0;
+    while (token != NULL) {
+        CLASS_SET[i++] = atoi(token);
+        token = strtok(NULL, " ");
+    }
+    return true;
 }
+
 
 void ClearArrayAndVariables() {
     memset(CLASS_SET, 0, sizeof(CLASS_SET));
